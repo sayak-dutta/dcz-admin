@@ -1,0 +1,4355 @@
+{
+	"info": {
+		"_postman_id": "10942cf7-ba0d-4768-bd9f-f10242258019",
+		"name": "Dating App Backend API",
+		"description": "Complete API collection for the dating app backend with authentication, user management, interactions, messaging, and chatrooms.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15910022",
+		"_collection_link": "https://interstellar-equinox-479625.postman.co/workspace/Dating-App-Backend~1b1b9a8b-a471-469c-b990-d80d97fd531e/collection/15910022-10942cf7-ba0d-4768-bd9f-f10242258019?action=share&source=collection_link&creator=15910022"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Manual Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"username\": \"john_doe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Create a new user account with email and password. Returns JWT token for authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Manual Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with email, username, or phone and password. Returns JWT token for authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current user profile. Requires JWT token in Authorization header."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password (Email)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user@example.com\",\n  \"type\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Initiate password reset process using email. Sends OTP to user's email for verification. Returns OTP code in development mode for testing."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password (Phone)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"+1234567890\",\n  \"type\": \"phone\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Initiate password reset process using phone number. Sends OTP to user's phone via SMS for verification. Returns OTP code in development mode for testing."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Reset OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"type\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-reset-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-reset-otp"
+							]
+						},
+						"description": "Verify the OTP sent for password reset. Supports both email and phone verification. Returns a temporary reset token valid for 15 minutes that can be used for password reset."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newPassword123\",\n  \"confirmPassword\": \"newPassword123\",\n  \"type\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset user password using verified OTP. Supports both email and phone. Requires identifier (email/phone), valid OTP, new password, password confirmation, and type (email/phone)."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password with Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resetToken\": \"{{reset_token}}\",\n  \"newPassword\": \"newPassword123\",\n  \"confirmPassword\": \"newPassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password-with-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password-with-token"
+							]
+						},
+						"description": "Reset user password using the reset token obtained from OTP verification. More secure alternative to the direct OTP method."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OTP Management",
+			"item": [
+				{
+					"name": "Request OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target\": \"user@example.com\",\n  \"type\": \"signup\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/otp/request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otp",
+								"request"
+							]
+						},
+						"description": "Request an OTP for email or phone verification. Currently returns OTP code in response for development/testing. Supports types: signup, login, password_reset."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target\": \"user@example.com\",\n  \"type\": \"signup\",\n  \"code\": \"250792\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/otp/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otp",
+								"verify"
+							]
+						},
+						"description": "Verify an OTP code for the given target (email/phone) and type. Returns success if OTP is valid and not expired."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Onboarding",
+			"item": [
+				{
+					"name": "Complete Onboarding",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"gender\": \"couple\",\n  \"sexuality\": \"straight\",\n  \"dateOfBirth\": \"1995-10-20\",\n  \"partner\": {\n    \"sexuality\": \"bi-sexual\",\n    \"dateOfBirth\": \"1993-05-15\"\n  },\n  \"interestedIn\": [\"female\", \"couple\"],\n  \"address\": {\n    \"street\": \"123 Main Street\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"United States\",\n    \"zipcode\": \"10001\"\n  },\n  \"bio\": \"We are a fun-loving couple looking to meet new people and explore new experiences together.\",\n  \"mainPhoto\": \"https://example.com/main-photo.jpg\",\n  \"photos\": [\n    \"https://example.com/photo1.jpg\",\n    \"https://example.com/photo2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"complete"
+							]
+						},
+						"description": "Complete user onboarding after signup. Collects essential profile information including gender, sexuality, date of birth, interests, address, bio, and photos. For couples, partner sexuality and date of birth are required."
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Onboarding (Single User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"gender\": \"female\",\n  \"sexuality\": \"bi-sexual\",\n  \"dateOfBirth\": \"1992-08-25\",\n  \"interestedIn\": [\"male\", \"female\"],\n  \"address\": {\n    \"street\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"country\": \"United States\",\n    \"zipcode\": \"90210\"\n  },\n  \"bio\": \"Love traveling, photography, and meeting interesting people! Looking for genuine connections.\",\n  \"mainPhoto\": \"https://example.com/single-main-photo.jpg\",\n  \"photos\": [\n    \"https://example.com/single-photo1.jpg\",\n    \"https://example.com/single-photo2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"complete"
+							]
+						},
+						"description": "Complete onboarding for a single user (non-couple). Partner information is not required for individual users."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Onboarding Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/onboarding/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"status"
+							]
+						},
+						"description": "Check if user has completed onboarding and get profile completeness percentage."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Onboarding Data",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"gender\": \"female\",\n  \"sexuality\": \"bi-sexual\",\n  \"dateOfBirth\": \"1992-05-15\",\n  \"interestedIn\": [\"male\", \"female\"],\n  \"address\": {\n    \"street\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"country\": \"United States\",\n    \"zipcode\": \"90210\"\n  },\n  \"bio\": \"Updated bio: Love traveling, photography, and meeting interesting people!\",\n  \"mainPhoto\": \"https://example.com/updated-main-photo.jpg\",\n  \"photos\": [\n    \"https://example.com/updated-photo1.jpg\",\n    \"https://example.com/updated-photo2.jpg\",\n    \"https://example.com/updated-photo3.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/update",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"update"
+							]
+						},
+						"description": "Update onboarding data after completion. Allows users to edit their profile information."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile Management",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "Get current user's profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"gender\": \"male\",\n  \"sexuality\": \"straight\",\n  \"interestedIn\": [\"female\"],\n  \"bio\": \"I love hiking and coffee!\",\n  \"photos\": [\"https://example.com/photo1.jpg\"],\n  \"location\": {\n    \"type\": \"Point\",\n    \"coordinates\": [-73.935242, 40.730610]\n  },\n  \"bodyHair\": \"trimmed\",\n  \"eyeColor\": \"brown\",\n  \"height\": \"5'10\",\n  \"weight\": \"175 lbs\",\n  \"bodyType\": \"athletic\",\n  \"ethnicBackground\": \"white\",\n  \"smoking\": \"never\",\n  \"piercings\": \"none\",\n  \"tattoos\": \"few\",\n  \"languagesSpoken\": [\"English\", \"Spanish\"],\n  \"looksAreImportant\": true,\n  \"intelligenceIsImportant\": true,\n  \"relationshipOrientation\": \"monogamous\",\n  \"experienceLevel\": {\n    \"curious\": false,\n    \"intermediate\": true,\n    \"advanced\": false,\n    \"newbie\": false\n  },\n  \"lookingFor\": [\"threesome\", \"full_swap\", \"soft_swap\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "Update user profile information. All fields are optional. Includes comprehensive profile data for physical attributes, lifestyle preferences, and experience levels."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Couple Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"Smith\",\n  \"dateOfBirth\": \"1988-03-15\",\n  \"gender\": \"couple\",\n  \"sexuality\": \"bi-sexual\",\n  \"interestedIn\": [\"female\", \"couple\"],\n  \"bio\": \"We are a fun-loving couple exploring new experiences together!\",\n  \"photos\": [\"https://example.com/couple-photo1.jpg\"],\n  \"bodyHair\": \"natural\",\n  \"eyeColor\": \"blue\",\n  \"height\": \"5'6\",\n  \"weight\": \"140 lbs\",\n  \"bodyType\": \"curvy\",\n  \"ethnicBackground\": \"mixed\",\n  \"smoking\": \"occasionally\",\n  \"piercings\": \"ears\",\n  \"tattoos\": \"some\",\n  \"languagesSpoken\": [\"English\", \"French\"],\n  \"looksAreImportant\": false,\n  \"intelligenceIsImportant\": true,\n  \"relationshipOrientation\": \"open\",\n  \"experienceLevel\": {\n    \"curious\": true,\n    \"intermediate\": false,\n    \"advanced\": false,\n    \"newbie\": true\n  },\n  \"lookingFor\": [\"couples_only\", \"wife_swap\", \"full_swap\"],\n  \"partner\": {\n    \"firstName\": \"Mike\",\n    \"lastName\": \"Smith\",\n    \"dateOfBirth\": \"1985-07-20\",\n    \"sexuality\": \"straight\",\n    \"bodyHair\": \"trimmed\",\n    \"eyeColor\": \"green\",\n    \"height\": \"6'0\",\n    \"weight\": \"180 lbs\",\n    \"bodyType\": \"muscular\",\n    \"ethnicBackground\": \"white\",\n    \"smoking\": \"never\",\n    \"piercings\": \"none\",\n    \"tattoos\": \"many\",\n    \"languagesSpoken\": [\"English\"],\n    \"looksAreImportant\": true,\n    \"intelligenceIsImportant\": true,\n    \"relationshipOrientation\": \"open\",\n    \"experienceLevel\": {\n      \"curious\": false,\n      \"intermediate\": true,\n      \"advanced\": true,\n      \"newbie\": false\n    },\n    \"lookingFor\": [\"threesome\", \"bdsm\", \"voyeur\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "Update couple profile with both partners' information. Includes detailed attributes for both individuals in the couple."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Preferences",
+			"item": [
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/preferences",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"preferences"
+							]
+						},
+						"description": "Get current user's dating preferences."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ageRange\": {\n    \"min\": 25,\n    \"max\": 35\n  },\n  \"maxDistance\": 50,\n  \"verified\": true,\n  \"bodyType\": [\"athletic\", \"average\", \"slim\"],\n  \"ethnicBackground\": [\"white\", \"mixed\", \"other\"],\n  \"smoking\": [\"never\", \"occasionally\"],\n  \"tattoos\": [\"none\", \"few\", \"some\"],\n  \"piercings\": [\"none\", \"ears\"],\n  \"experienceLevel\": [\"intermediate\", \"advanced\"],\n  \"relationshipOrientation\": [\"monogamous\", \"open\"],\n  \"lookingFor\": [\"threesome\", \"full_swap\", \"voyeur\", \"couples_only\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/preferences",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"preferences"
+							]
+						},
+						"description": "Update user's dating preferences including age range, distance, verification preferences, and advanced filtering options for body type, ethnic background, lifestyle choices, and experience levels."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Media Upload",
+			"item": [
+				{
+					"name": "Upload Single File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "folder",
+									"value": "profiles",
+									"type": "text"
+								},
+								{
+									"key": "optimize",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "createThumbnail",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/media/upload/single",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"upload",
+								"single"
+							]
+						},
+						"description": "Upload a single file to S3 with optimization and thumbnail generation."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Multiple Files",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "folder",
+									"value": "messages",
+									"type": "text"
+								},
+								{
+									"key": "optimize",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/media/upload/multiple",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"upload",
+								"multiple"
+							]
+						},
+						"description": "Upload multiple files to S3 with batch processing."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Photo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profilePhoto",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/media/upload/profile-photo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"upload",
+								"profile-photo"
+							]
+						},
+						"description": "Upload a profile photo with automatic optimization and user profile update."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Photos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profilePhotos",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "profilePhotos",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/media/upload/profile-photos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"upload",
+								"profile-photos"
+							]
+						},
+						"description": "Upload multiple profile photos (max 6) with automatic profile update."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Message Media",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/media/upload/message-media",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"upload",
+								"message-media"
+							]
+						},
+						"description": "Upload media for messages (images/videos) with optimization."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Presigned URL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fileName\": \"example.jpg\",\n  \"mimeType\": \"image/jpeg\",\n  \"folder\": \"profiles\",\n  \"expiresIn\": 3600\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/media/presigned-url",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"presigned-url"
+							]
+						},
+						"description": "Generate a presigned URL for direct client-side upload to S3."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"key\": \"profiles/userId_timestamp_uuid.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/media/delete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"delete"
+							]
+						},
+						"description": "Delete a single file from S3 storage."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Multiple Files",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"keys\": [\n    \"profiles/userId_timestamp1_uuid1.jpg\",\n    \"profiles/userId_timestamp2_uuid2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/media/delete/multiple",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"delete",
+								"multiple"
+							]
+						},
+						"description": "Delete multiple files from S3 storage in batch."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile Photos",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"reorder\",\n  \"photoUrls\": [\n    \"https://bucket.s3.region.amazonaws.com/profiles/photo1.jpg\",\n    \"https://bucket.s3.region.amazonaws.com/profiles/photo2.jpg\",\n    \"https://bucket.s3.region.amazonaws.com/profiles/photo3.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/media/profile/photos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"profile",
+								"photos"
+							]
+						},
+						"description": "Add, remove, or reorder profile photos. Actions: add, remove, reorder."
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/media/info/profiles/userId_timestamp_uuid.jpg",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"media",
+								"info",
+								"profiles",
+								"userId_timestamp_uuid.jpg"
+							]
+						},
+						"description": "Get information about a specific file."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posts & Feed",
+			"item": [
+				{
+					"name": "Upload Post Media",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "media",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "folder",
+									"value": "posts",
+									"type": "text"
+								},
+								{
+									"key": "optimize",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/upload-media",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"upload-media"
+							]
+						},
+						"description": "Upload media files for posts with automatic optimization."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"text\": \"Just had an amazing day at the beach! 🏖️ #beachday #summer\",\n    \"media\": [\n      {\n        \"type\": \"image\",\n        \"url\": \"https://your-bucket.s3.amazonaws.com/posts/image1.jpg\",\n        \"thumbnailUrl\": \"https://your-bucket.s3.amazonaws.com/thumbnails/posts/image1.jpg\",\n        \"key\": \"posts/userId_timestamp_uuid.jpg\",\n        \"metadata\": {\n          \"width\": 1200,\n          \"height\": 800,\n          \"size\": 245760,\n          \"format\": \"image/jpeg\"\n        }\n      }\n    ]\n  },\n  \"privacy\": \"friends\",\n  \"location\": {\n    \"coordinates\": [-73.935242, 40.730610],\n    \"name\": \"Central Park\",\n    \"address\": \"New York, NY\"\n  },\n  \"tags\": [\"beachday\", \"summer\", \"fun\"],\n  \"mentions\": [\"507f1f77bcf86cd799439011\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Create a new post with text, media, location, tags, and mentions."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feed Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/feed?page=1&limit=20&privacy=friends,public&sortBy=createdAt&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Posts per page (default: 20, max: 50)"
+								},
+								{
+									"key": "privacy",
+									"value": "friends,public",
+									"description": "Privacy levels to include"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by: createdAt, engagement, trending"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"description": "Sort order: asc, desc"
+								}
+							]
+						},
+						"description": "Get posts for the user's feed, including their own posts and friends' posts."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Trending Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/trending?page=1&limit=20&timeframe=7",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"trending"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "timeframe",
+									"value": "7",
+									"description": "Timeframe in days (default: 7)"
+								}
+							]
+						},
+						"description": "Get trending posts based on engagement score."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/user/507f1f77bcf86cd799439011?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"user",
+								"507f1f77bcf86cd799439011"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Get posts by a specific user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Post",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get a specific post by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"text\": \"Updated post content! Still loving this beach day 🌊\",\n    \"media\": [\n      {\n        \"type\": \"image\",\n        \"url\": \"https://your-bucket.s3.amazonaws.com/posts/updated-image.jpg\",\n        \"thumbnailUrl\": \"https://your-bucket.s3.amazonaws.com/thumbnails/posts/updated-image.jpg\",\n        \"key\": \"posts/userId_timestamp_uuid2.jpg\"\n      }\n    ]\n  },\n  \"privacy\": \"public\",\n  \"tags\": [\"beach\", \"ocean\", \"waves\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Update an existing post. Only the post owner can update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete a post. Only the post owner can delete."
+					},
+					"response": []
+				},
+				{
+					"name": "Like/Unlike Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/like",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"like"
+							]
+						},
+						"description": "Like or unlike a post. Toggles the like status."
+					},
+					"response": []
+				},
+				{
+					"name": "Share Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"text\": \"Sharing this amazing post! 👍\"\n  },\n  \"privacy\": \"friends\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/share",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"share"
+							]
+						},
+						"description": "Share a post with optional additional content."
+					},
+					"response": []
+				},
+				{
+					"name": "Report Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"inappropriate_content\",\n  \"description\": \"This post contains inappropriate content that violates community guidelines.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"report"
+							]
+						},
+						"description": "Report a post for inappropriate content or other violations."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"text\": \"Great post! Love this photo 📸\"\n  },\n  \"mentions\": [\"507f1f77bcf86cd799439012\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"comments"
+							]
+						},
+						"description": "Create a comment on a post."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post Comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/comments?page=1&limit=20&sortBy=createdAt&sortOrder=asc&includeReplies=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"comments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by: createdAt, likes"
+								},
+								{
+									"key": "sortOrder",
+									"value": "asc",
+									"description": "Sort order: asc, desc"
+								},
+								{
+									"key": "includeReplies",
+									"value": "true",
+									"description": "Include comment replies"
+								}
+							]
+						},
+						"description": "Get comments for a specific post."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"text\": \"Updated comment: This is even better now! 🎉\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/comments/507f1f77bcf86cd799439012",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"comments",
+								"507f1f77bcf86cd799439012"
+							]
+						},
+						"description": "Update a comment. Only the comment author can update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/comments/507f1f77bcf86cd799439012",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"comments",
+								"507f1f77bcf86cd799439012"
+							]
+						},
+						"description": "Delete a comment. Only the comment author can delete."
+					},
+					"response": []
+				},
+				{
+					"name": "Like/Unlike Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/507f1f77bcf86cd799439011/comments/507f1f77bcf86cd799439012/like",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"507f1f77bcf86cd799439011",
+								"comments",
+								"507f1f77bcf86cd799439012",
+								"like"
+							]
+						},
+						"description": "Like or unlike a comment. Toggles the like status."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Interactions",
+			"item": [
+				{
+					"name": "Create Interaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetUserId\": \"507f1f77bcf86cd799439011\",\n  \"interactionType\": \"like\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/interactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions"
+							]
+						},
+						"description": "Create a new interaction (like, dislike, block, report) with another user. If both users like each other, a match is automatically created."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Interactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions"
+							]
+						},
+						"description": "Get all interactions created by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Matches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/matches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"matches"
+							]
+						},
+						"description": "Get all mutual matches (where both users liked each other)."
+					},
+					"response": []
+				},
+				{
+					"name": "Who Liked Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/likes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"likes"
+							]
+						},
+						"description": "Get list of users who liked the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Who Disliked Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/dislikes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"dislikes"
+							]
+						},
+						"description": "Get list of users who disliked the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Users I Liked",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/my-likes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"my-likes"
+							]
+						},
+						"description": "Get list of users that the current user liked."
+					},
+					"response": []
+				},
+				{
+					"name": "Users I Disliked",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/my-dislikes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"my-dislikes"
+							]
+						},
+						"description": "Get list of users that the current user disliked."
+					},
+					"response": []
+				},
+				{
+					"name": "Who I Blocked",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/blocks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"blocks"
+							]
+						},
+						"description": "Get list of users blocked by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "My Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/reports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"reports"
+							]
+						},
+						"description": "Get list of users reported by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Interaction",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/interactions/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interactions",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Remove a specific interaction (like, block, etc.) created by the current user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Matches",
+			"item": [
+				{
+					"name": "Get All Matches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/matches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches"
+							]
+						},
+						"description": "Get all active matches for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Match Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/matches/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get detailed information about a specific match."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Match",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/matches/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete/expire a match (sets status to 'deleted')."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Messaging",
+			"item": [
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"matchId\": \"507f1f77bcf86cd799439011\",\n  \"content\": \"Hey! How are you doing?\",\n  \"messageType\": \"text\",\n  \"mediaUrl\": \"https://example.com/image.jpg\",\n  \"isDestructive\": false,\n  \"destructAfter\": 3600\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"messages"
+							]
+						},
+						"description": "Send a message to a matched user. Supports text, image, voice, and video messages with optional self-destruct functionality."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversation History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/messages/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"messages",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get all messages in a conversation with a matched user."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/messages/507f1f77bcf86cd799439011/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"messages",
+								"507f1f77bcf86cd799439011",
+								"read"
+							]
+						},
+						"description": "Mark a specific message as read by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Message",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated message content\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/messages/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"messages",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Edit a message sent by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Message",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/messages/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"messages",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete a message sent by the current user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Discovery & Profile Views",
+			"item": [
+				{
+					"name": "List All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users?page=1&limit=20&gender=female&ageMin=25&ageMax=35&verified=true&online=true&sortBy=createdAt&sortOrder=desc&search=john",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								},
+								{
+									"key": "gender",
+									"value": "female",
+									"description": "Filter by gender (male, female, couple, non-binary)"
+								},
+								{
+									"key": "interestedIn",
+									"value": "male",
+									"description": "Filter by interested in (male, female, couple, non-binary)"
+								},
+								{
+									"key": "ageMin",
+									"value": "25",
+									"description": "Minimum age filter"
+								},
+								{
+									"key": "ageMax",
+									"value": "35",
+									"description": "Maximum age filter"
+								},
+								{
+									"key": "verified",
+									"value": "true",
+									"description": "Filter by email verification status"
+								},
+								{
+									"key": "online",
+									"value": "true",
+									"description": "Filter by online status (true for online users, false for offline)"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by field (createdAt, lastSeen, username)"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"description": "Sort order (asc, desc)"
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"description": "Search in username, firstName, lastName"
+								}
+							]
+						},
+						"description": "Get a paginated list of all active users on the platform with optional filters for gender, age, verification status, online status, and search. Excludes sensitive data like passwords."
+					},
+					"response": []
+				},
+				{
+					"name": "Record Profile View",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"source\": \"search\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/507f1f77bcf86cd799439011/view",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"507f1f77bcf86cd799439011",
+								"view"
+							]
+						},
+						"description": "Record that the current user viewed another user's profile. Source can be: search, recommendation, profile_link, other. Self-views are ignored."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile Viewers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/profile-views?page=1&limit=20&sortBy=timestamp&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile-views"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								},
+								{
+									"key": "sortBy",
+									"value": "timestamp",
+									"description": "Sort by field (timestamp, username)"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"description": "Sort order (asc, desc)"
+								}
+							]
+						},
+						"description": "Get a paginated list of users who viewed the current user's profile, with full user data (excluding sensitive information) and view timestamps."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users I Viewed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/my-profile-views?page=1&limit=20&sortBy=timestamp&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"my-profile-views"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								},
+								{
+									"key": "sortBy",
+									"value": "timestamp",
+									"description": "Sort by field (timestamp, username)"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"description": "Sort order (asc, desc)"
+								}
+							]
+						},
+						"description": "Get a paginated list of users that the current user has viewed, with full user data (excluding sensitive information) and view timestamps."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile View Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/profile-views/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile-views",
+								"stats"
+							]
+						},
+						"description": "Get profile view statistics including total views, views today, views this week, and unique viewers count."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chat Rooms",
+			"item": [
+				{
+					"name": "Create Chat Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Coffee Lovers Secret Club\",\n  \"type\": \"secret\",\n  \"description\": \"A secret room for coffee enthusiasts\",\n  \"maxParticipants\": 100,\n  \"rules\": [\"Be respectful\", \"No spam\"],\n  \"blockSingleMales\": true,\n  \"goingLive\": \"later\",\n  \"inviteOnly\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chatrooms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms"
+							]
+						},
+						"description": "Create a new public, private, or secret chat room with enhanced features like blocking single males and live functionality. Creator automatically becomes moderator and participant."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Public Rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms"
+							]
+						},
+						"description": "Get all active public chat rooms."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/my",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"my"
+							]
+						},
+						"description": "Get all chat rooms where the current user is a participant."
+					},
+					"response": []
+				},
+				{
+					"name": "Join Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/join",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"join"
+							]
+						},
+						"description": "Join a public chat room as a participant."
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"leave"
+							]
+						},
+						"description": "Leave a chat room and remove from participants list."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Room Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Hello everyone!\",\n  \"messageType\": \"text\",\n  \"mediaUrl\": \"https://example.com/image.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"messages"
+							]
+						},
+						"description": "Send a message to a chat room. User must be a participant in the room."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Room Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/messages?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Number of messages per page"
+								}
+							]
+						},
+						"description": "Get paginated messages in a chat room. User must be a participant."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Live Chat Rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/live",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"live"
+							]
+						},
+						"description": "Get all public chat rooms that are currently live."
+					},
+					"response": []
+				},
+				{
+					"name": "Join Secret Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inviteCode\": \"ABC123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chatrooms/join-secret",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"join-secret"
+							]
+						},
+						"description": "Join a secret chat room using a 6-character invite code."
+					},
+					"response": []
+				},
+				{
+					"name": "Control Live Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"start\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/live",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"live"
+							]
+						},
+						"description": "Start or end live status for a chat room. Only room creator or moderators can control this. Action can be 'start' or 'end'."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Room Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get detailed information about a specific chat room with populated member data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Friends",
+			"item": [
+				{
+					"name": "Get My Friends List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friends?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friends"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get the current user's friends list with populated user data, including profile information and ages."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User's Friends List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friends/507f1f77bcf86cd799439011?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friends",
+								"507f1f77bcf86cd799439011"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get another user's friends list with populated user data. Can be used to view friends of any user, whether they are your friend or not."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Friend Requests",
+			"item": [
+				{
+					"name": "Send Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receiverId\": \"507f1f77bcf86cd799439011\",\n  \"message\": \"Hi! I'd like to be friends.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/friend-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests"
+							]
+						},
+						"description": "Send a friend request to another user. Cannot send to yourself or users you're already friends with."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Friend Requests (Received)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friend-requests?type=received&status=pending&page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "received",
+									"description": "Type of requests (received, sent)"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status (pending, accepted, declined, cancelled)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get friend requests received by the current user with pagination and filtering options."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Friend Requests (Sent)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friend-requests?type=sent&page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "sent",
+									"description": "Type of requests (received, sent)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get friend requests sent by the current user with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Friend Request",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"accept\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/friend-requests/507f1f77bcf86cd799439011/respond",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests",
+								"507f1f77bcf86cd799439011",
+								"respond"
+							]
+						},
+						"description": "Accept a friend request. Only the receiver can accept requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Decline Friend Request",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"decline\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/friend-requests/507f1f77bcf86cd799439011/respond",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests",
+								"507f1f77bcf86cd799439011",
+								"respond"
+							]
+						},
+						"description": "Decline a friend request. Only the receiver can decline requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Friend Request",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friend-requests/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Cancel a sent friend request. Only the sender can cancel pending requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Friend Request Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/friend-requests/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"friend-requests",
+								"stats"
+							]
+						},
+						"description": "Get friend request statistics including pending received, pending sent, and total friends count."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Personal Messages",
+			"item": [
+				{
+					"name": "Send Personal Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receiverId\": \"507f1f77bcf86cd799439011\",\n  \"content\": \"Hey! How are you doing?\",\n  \"messageType\": \"text\",\n  \"mediaUrl\": null,\n  \"replyTo\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/personal-messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages"
+							]
+						},
+						"description": "Send a personal message to another user. Supports text, image, voice, video, and file messages with reply functionality."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversations List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/conversations?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"conversations"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get a list of all conversations with last message and unread count for each."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversation with User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/conversations/507f1f77bcf86cd799439011?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"conversations",
+								"507f1f77bcf86cd799439011"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Messages per page (default: 50)"
+								}
+							]
+						},
+						"description": "Get all messages in a conversation with a specific user. Automatically marks messages as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/507f1f77bcf86cd799439011/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"507f1f77bcf86cd799439011",
+								"read"
+							]
+						},
+						"description": "Mark a specific personal message as read. Only the receiver can mark messages as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Conversation as Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/conversations/507f1f77bcf86cd799439011/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"conversations",
+								"507f1f77bcf86cd799439011",
+								"read"
+							]
+						},
+						"description": "Mark all messages in a conversation as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Personal Message",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated message content\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/personal-messages/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Edit a personal message. Only text messages can be edited and only within 24 hours of sending."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Personal Message",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete a personal message for yourself. The message remains visible to the other participant unless they also delete it."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Messages Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-messages/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-messages",
+								"unread-count"
+							]
+						},
+						"description": "Get the total count of unread personal messages for the current user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Feed & Notifications",
+			"item": [
+				{
+					"name": "Get Feed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed?page=1&limit=20&type=friend_request&priority=high&unreadOnly=false",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "type",
+									"value": "friend_request",
+									"description": "Filter by feed type (friend_request, like_received, match_created, birthday_reminder, etc.)"
+								},
+								{
+									"key": "priority",
+									"value": "high",
+									"description": "Filter by priority (low, medium, high, urgent)"
+								},
+								{
+									"key": "unreadOnly",
+									"value": "false",
+									"description": "Show only unread items (true/false)"
+								}
+							]
+						},
+						"description": "Get personalized feed containing friend requests, likes, matches, birthdays, group invitations, and other notifications."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Feed Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"unread-count"
+							]
+						},
+						"description": "Get the count of unread feed items for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Feed Item as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed/507f1f77bcf86cd799439011/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"507f1f77bcf86cd799439011",
+								"read"
+							]
+						},
+						"description": "Mark a specific feed item as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Multiple Feed Items as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feedIds\": [\"507f1f77bcf86cd799439011\", \"507f1f77bcf86cd799439012\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/feed/read-multiple",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"read-multiple"
+							]
+						},
+						"description": "Mark multiple feed items as read in a single request."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Feed Items as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"read-all"
+							]
+						},
+						"description": "Mark all feed items as read for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Feed Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete a specific feed item."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feed Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/feed/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"feed",
+								"stats"
+							]
+						},
+						"description": "Get feed statistics including counts by type and priority."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Remember Me (Poke System)",
+			"item": [
+				{
+					"name": "Send Remember Me",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receiverId\": \"507f1f77bcf86cd799439011\",\n  \"message\": \"Hey! Remember me? 👋\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/remember-me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me"
+							]
+						},
+						"description": "Send a 'Remember Me' poke to another user. Like a gentle nudge to get their attention."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Received Remember Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/remember-me/received?page=1&limit=20&status=active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me",
+								"received"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"description": "Filter by status (active, seen, expired)"
+								}
+							]
+						},
+						"description": "Get Remember Me pokes received by the current user with pagination and status filtering."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sent Remember Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/remember-me/sent?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me",
+								"sent"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get Remember Me pokes sent by the current user with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Remember Me as Seen",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/remember-me/507f1f77bcf86cd799439011/seen",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me",
+								"507f1f77bcf86cd799439011",
+								"seen"
+							]
+						},
+						"description": "Mark a received Remember Me poke as seen."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Remember Me",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/remember-me/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete/cancel a Remember Me poke. Can be done by sender or receiver."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Remember Me Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/remember-me/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"remember-me",
+								"stats"
+							]
+						},
+						"description": "Get Remember Me statistics including sent and received counts by status."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Business Profile Requests",
+			"item": [
+				{
+					"name": "Submit Business Profile Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@business.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"companyName\": \"2+1 Business Co.\",\n  \"webUrl\": \"https://business.com\",\n  \"location\": {\n    \"country\": \"United States\",\n    \"state\": \"California\"\n  },\n  \"isMember\": false,\n  \"goals\": {\n    \"promoteEvents\": true,\n    \"buildAudience\": true,\n    \"promoteClub\": false,\n    \"promoteBnbHotel\": false,\n    \"sellProduct\": true,\n    \"paidAdvertising\": true\n  },\n  \"referralSource\": \"A friend\",\n  \"additionalInfo\": \"Looking to promote our events and build a community.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/business-request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request"
+							]
+						},
+						"description": "Submit a business profile request. Requires JWT authentication. The request is automatically linked to the authenticated user. User data (firstName, lastName, email, phoneNumber) can be omitted if already present in user profile."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Business Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/business-request/my-request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request",
+								"my-request"
+							]
+						},
+						"description": "Get the current user's business profile request status. Returns the most recent request if multiple exist."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Business Requests (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/business-request/all?status=pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request",
+								"all"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status (pending, approved, rejected)"
+								}
+							]
+						},
+						"description": "Get all business profile requests. Admin only endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Business Request Details (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/business-request/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get details of a specific business profile request. Admin only endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Business Request (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/business-request/507f1f77bcf86cd799439011/approve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request",
+								"507f1f77bcf86cd799439011",
+								"approve"
+							]
+						},
+						"description": "Approve a business profile request. Updates the existing user's role to 'business' and creates a business profile linked to that user. Admin only endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Business Request (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/business-request/507f1f77bcf86cd799439011/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"business-request",
+								"507f1f77bcf86cd799439011",
+								"reject"
+							]
+						},
+						"description": "Reject a business profile request. Admin only endpoint."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chatroom Reports",
+			"item": [
+				{
+					"name": "Report Chatroom",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportType\": \"inappropriate_content\",\n  \"description\": \"This room contains inappropriate content that violates community guidelines.\",\n  \"reportedUserId\": \"507f1f77bcf86cd799439011\",\n  \"messageId\": \"507f1f77bcf86cd799439012\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"report"
+							]
+						},
+						"description": "Report a chatroom, specific user in a chatroom, or a specific message. Report types: inappropriate_content, spam, harassment, hate_speech, fake_profile, underage, other."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chatroom Reports (Moderators)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/chatrooms/507f1f77bcf86cd799439011/reports?page=1&limit=20&status=pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatrooms",
+								"507f1f77bcf86cd799439011",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status (pending, under_review, resolved, dismissed)"
+								}
+							]
+						},
+						"description": "Get reports for a specific chatroom. Only accessible by room moderators, creators, or admins."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "Create Group",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Erotic Parties & Clubs\",\n  \"description\": \"A community for those interested in erotic parties and exclusive club events. Share experiences, meet like-minded people, and discover exciting events in your area.\",\n  \"location\": \"New York, NY\",\n  \"groupType\": \"open\",\n  \"targetAudience\": \"couples\",\n  \"category\": \"social\",\n  \"tags\": [\"parties\", \"clubs\", \"events\", \"social\"],\n  \"rules\": \"Please be respectful to all members. No explicit content without proper warnings. Follow community guidelines.\",\n  \"settings\": {\n    \"allowMemberInvites\": true,\n    \"allowMemberPosts\": true,\n    \"allowMemberEvents\": false,\n    \"maxMembers\": 1000,\n    \"minAge\": 21,\n    \"maxAge\": null\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups"
+							]
+						},
+						"description": "Create a new group. Requires authentication. Creator becomes group admin automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Groups",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/groups?page=1&limit=20&search=party&category=social&groupType=open&targetAudience=couples&sortBy=popular&featured=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								},
+								{
+									"key": "search",
+									"value": "party",
+									"description": "Search in group name, description, and tags"
+								},
+								{
+									"key": "category",
+									"value": "social",
+									"description": "Filter by category: social, dating, events, business, lifestyle, hobbies, other"
+								},
+								{
+									"key": "groupType",
+									"value": "open",
+									"description": "Filter by type: open, closed, private"
+								},
+								{
+									"key": "targetAudience",
+									"value": "couples",
+									"description": "Filter by audience: couples, females, males, transgender, business, everyone"
+								},
+								{
+									"key": "sortBy",
+									"value": "popular",
+									"description": "Sort by: newest, oldest, popular, activity, name"
+								},
+								{
+									"key": "featured",
+									"value": "true",
+									"description": "Filter featured groups (true/false)"
+								}
+							]
+						},
+						"description": "Get all active groups with filtering and pagination. Public endpoint - no authentication required."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Groups",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/groups/my-groups?page=1&limit=20&status=active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"my-groups"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"description": "Membership status: active, pending, banned, left"
+								}
+							]
+						},
+						"description": "Get groups where the authenticated user is a member. Requires authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Group",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Get detailed information about a specific group including recent members. Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Group",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Group Name\",\n  \"description\": \"Updated description for the group\",\n  \"location\": \"Los Angeles, CA\",\n  \"rules\": \"Updated group rules and guidelines\",\n  \"tags\": [\"updated\", \"tags\"],\n  \"settings\": {\n    \"allowMemberInvites\": false,\n    \"maxMembers\": 500\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Update group details. Only group admins can update groups."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Group",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Delete a group (soft delete). Only group creator can delete the group."
+					},
+					"response": []
+				},
+				{
+					"name": "Join Group",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Hi, I would like to join this group. I'm interested in the community and events.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/join",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"join"
+							]
+						},
+						"description": "Join a group. For open groups, joins immediately. For closed groups, creates a pending request."
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Group",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"leave"
+							]
+						},
+						"description": "Leave a group. Group creators cannot leave their own groups."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Group Members",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/members?page=1&limit=20&role=admin&status=active&search=john&sortBy=newest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"members"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "role",
+									"value": "admin",
+									"description": "Filter by role: member, moderator, admin, creator"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"description": "Filter by status: active, pending, banned, left"
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"description": "Search members by name or username"
+								},
+								{
+									"key": "sortBy",
+									"value": "newest",
+									"description": "Sort by: newest, oldest, activity, name, role"
+								}
+							]
+						},
+						"description": "Get group members with filtering and search. Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Invite Members",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userIds\": [\n    \"507f1f77bcf86cd799439012\",\n    \"507f1f77bcf86cd799439013\",\n    \"507f1f77bcf86cd799439014\"\n  ],\n  \"message\": \"You're invited to join our awesome group!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/invite",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"invite"
+							]
+						},
+						"description": "Invite users to join a group. Requires moderator permissions or above."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Join Requests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/requests?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get pending join requests for a group. Requires moderator permissions or above."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve/Reject Join Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"approve\",\n  \"reason\": \"Welcome to our group!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/requests/507f1f77bcf86cd799439012",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"requests",
+								"507f1f77bcf86cd799439012"
+							]
+						},
+						"description": "Approve or reject a join request. Action can be 'approve' or 'reject'. Requires moderator permissions or above."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Member Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"507f1f77bcf86cd799439012\",\n  \"role\": \"moderator\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/members/507f1f77bcf86cd799439012/role",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"members",
+								"507f1f77bcf86cd799439012",
+								"role"
+							]
+						},
+						"description": "Update a member's role in the group. Role can be 'member', 'moderator', or 'admin'. Only admins can promote to admin (creator only). Requires admin permissions."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove/Ban Member",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"507f1f77bcf86cd799439012\",\n  \"reason\": \"Violation of group rules\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/members/507f1f77bcf86cd799439012?action=ban",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"members",
+								"507f1f77bcf86cd799439012"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "ban",
+									"description": "Action: 'remove' (default) or 'ban'"
+								}
+							]
+						},
+						"description": "Remove or ban a member from the group. Use action=ban to ban the member. Requires moderator permissions or above."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notification Settings",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"posts\": true,\n  \"events\": false,\n  \"announcements\": true,\n  \"memberJoins\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"notifications"
+							]
+						},
+						"description": "Update notification preferences for a group. User must be a member of the group."
+					},
+					"response": []
+				},
+				{
+					"name": "Report Group",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"inappropriate_content\",\n  \"description\": \"This group contains inappropriate content that violates community guidelines.\",\n  \"evidence\": [\n    \"https://example.com/screenshot1.jpg\",\n    \"https://example.com/screenshot2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/groups/507f1f77bcf86cd799439011/report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"507f1f77bcf86cd799439011",
+								"report"
+							]
+						},
+						"description": "Report a group for inappropriate content or behavior. Reason can be: inappropriate_content, harassment, spam, fake_group, violence, other."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Groups",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/groups/search/party?page=1&limit=20&category=social&groupType=open&sortBy=popular",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"groups",
+								"search",
+								"party"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "category",
+									"value": "social",
+									"description": "Filter by category"
+								},
+								{
+									"key": "groupType",
+									"value": "open",
+									"description": "Filter by group type"
+								},
+								{
+									"key": "sortBy",
+									"value": "popular",
+									"description": "Sort by: popular, activity, newest"
+								}
+							]
+						},
+						"description": "Search groups by text query. Searches in group name, description, and tags."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://46.202.189.73:88",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "your-jwt-token-here",
+			"type": "string"
+		},
+		{
+			"key": "reset_token",
+			"value": "your-reset-token-here",
+			"type": "string"
+		}
+	]
+}
