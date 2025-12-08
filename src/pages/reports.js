@@ -110,10 +110,10 @@ export default function ReportedContent() {
 
 	const getContentIcon = (type) => {
 		switch (type) {
-			case 'image': return <Image className="w-4 h-4" />;
-			case 'video': return <Video className="w-4 h-4" />;
-			case 'message': return <MessageSquare className="w-4 h-4" />;
-			default: return <MessageSquare className="w-4 h-4" />;
+			case 'image': return <Image className="w-4 h-4" aria-hidden="true" />;
+			case 'video': return <Video className="w-4 h-4" aria-hidden="true" />;
+			case 'message': return <MessageSquare className="w-4 h-4" aria-hidden="true" />;
+			default: return <MessageSquare className="w-4 h-4" aria-hidden="true" />;
 		}
 	};
 
@@ -239,8 +239,8 @@ export default function ReportedContent() {
 													{report.evidence.slice(0, 7).map((evidence, index) => (
 														<div key={index} className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
 															{evidence.includes('.jpg') || evidence.includes('.png') ?
-																<Image className="w-6 h-6 text-gray-500" /> :
-																<Video className="w-6 h-6 text-gray-500" />
+																<Image className="w-6 h-6 text-gray-500" aria-hidden="true" /> :
+																<Video className="w-6 h-6 text-gray-500" aria-hidden="true" />
 															}
 														</div>
 													))}

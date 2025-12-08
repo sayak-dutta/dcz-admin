@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API base configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.189.73:88';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.desicouplesz.com';
 
 // Create axios instance
 const api = axios.create({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { userAPI } from '@/lib/api';
 
 export const useUsers = (params = {}) => {
@@ -12,7 +12,7 @@ export const useUsers = (params = {}) => {
 		totalPages: 0
 	});
 
-	const fetchUsers = async (searchParams = {}) => {
+	const fetchUsers = useCallback(async (searchParams = {}) => {
 		setLoading(true);
 		setError(null);
 
@@ -35,13 +35,13 @@ export const useUsers = (params = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [params]);
 
 	const banUser = async (userId, reason) => {
 		try {
 			await userAPI.banUser(userId, reason);
 			// Refresh users list
-			await fetchUsers(params);
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to ban user';
@@ -54,7 +54,7 @@ export const useUsers = (params = {}) => {
 		try {
 			await userAPI.unbanUser(userId);
 			// Refresh users list
-			await fetchUsers(params);
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to unban user';
@@ -67,7 +67,7 @@ export const useUsers = (params = {}) => {
 		try {
 			await userAPI.updateUser(userId, userData);
 			// Refresh users list
-			await fetchUsers(params);
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to update user';
@@ -77,8 +77,8 @@ export const useUsers = (params = {}) => {
 	};
 
 	useEffect(() => {
-		fetchUsers(params);
-	}, []);
+		fetchUsers();
+	}, [fetchUsers]);
 
 	return {
 		users,
@@ -89,6 +89,6 @@ export const useUsers = (params = {}) => {
 		banUser,
 		unbanUser,
 		updateUser,
-		refetch: () => fetchUsers(params)
+		refetch: () => fetchUsers()
 	};
 };

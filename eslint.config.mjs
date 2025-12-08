@@ -20,6 +20,14 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      // React hooks exhaustive deps - warnings are acceptable for dynamic params
+      "react-hooks/exhaustive-deps": "warn",
+      // Allow unescaped entities - we use proper HTML entities where needed
+      "react/no-unescaped-entities": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;

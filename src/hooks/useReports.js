@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { moderationAPI } from '@/lib/api';
 
 export const useReports = (params = {}) => {
@@ -12,7 +12,7 @@ export const useReports = (params = {}) => {
 		avgResponseTime: '0h'
 	});
 
-	const fetchReports = async (searchParams = {}) => {
+	const fetchReports = useCallback(async (searchParams = {}) => {
 		setLoading(true);
 		setError(null);
 
@@ -34,13 +34,13 @@ export const useReports = (params = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [params]);
 
 	const resolveReport = async (reportId, action, reason = '') => {
 		try {
 			await moderationAPI.resolveReport(reportId, { action, reason });
 			// Refresh reports list
-			await fetchReports(params);
+			await fetchReports();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to resolve report';
@@ -72,8 +72,8 @@ export const useReports = (params = {}) => {
 	};
 
 	useEffect(() => {
-		fetchReports(params);
-	}, []);
+		fetchReports();
+	}, [fetchReports]);
 
 	return {
 		reports,
@@ -84,6 +84,6 @@ export const useReports = (params = {}) => {
 		resolveReport,
 		reportUser,
 		reportPost,
-		refetch: () => fetchReports(params)
+		refetch: () => fetchReports()
 	};
 };

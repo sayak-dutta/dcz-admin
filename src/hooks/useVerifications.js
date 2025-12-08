@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { verificationAPI } from '@/lib/api';
 
 export const useVerifications = (params = {}) => {
@@ -12,7 +12,7 @@ export const useVerifications = (params = {}) => {
 		avgReviewTime: '0h'
 	});
 
-	const fetchVerifications = async (searchParams = {}) => {
+	const fetchVerifications = useCallback(async (searchParams = {}) => {
 		setLoading(true);
 		setError(null);
 
@@ -34,13 +34,13 @@ export const useVerifications = (params = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [params]);
 
 	const approveVerification = async (verificationId) => {
 		try {
 			await verificationAPI.approveVerification(verificationId);
 			// Refresh verifications list
-			await fetchVerifications(params);
+			await fetchVerifications();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to approve verification';
@@ -53,7 +53,7 @@ export const useVerifications = (params = {}) => {
 		try {
 			await verificationAPI.rejectVerification(verificationId, reason);
 			// Refresh verifications list
-			await fetchVerifications(params);
+			await fetchVerifications();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to reject verification';
@@ -74,8 +74,8 @@ export const useVerifications = (params = {}) => {
 	};
 
 	useEffect(() => {
-		fetchVerifications(params);
-	}, []);
+		fetchVerifications();
+	}, [fetchVerifications]);
 
 	return {
 		verifications,
@@ -86,6 +86,6 @@ export const useVerifications = (params = {}) => {
 		approveVerification,
 		rejectVerification,
 		requestNewVerification,
-		refetch: () => fetchVerifications(params)
+		refetch: () => fetchVerifications()
 	};
 };

@@ -128,7 +128,7 @@ export default function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900">
+      {/* <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
             <span className="text-xs font-semibold text-white">AU</span>
@@ -139,7 +139,7 @@ export default function Sidebar() {
           </div>
           <Settings className="w-4 h-4 text-slate-400" />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

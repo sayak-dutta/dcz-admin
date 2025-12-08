@@ -240,7 +240,7 @@ export default function ProfileVerifications() {
 										<div className="mb-6">
 											<h4 className="font-medium mb-2">User Notes</h4>
 											<p className="text-sm bg-gray-50 p-3 rounded">
-												"{verification.notes}"
+												&ldquo;{verification.notes}&rdquo;
 											</p>
 										</div>
 
@@ -267,7 +267,7 @@ export default function ProfileVerifications() {
 												<option value="poor_quality">Poor video quality</option>
 												<option value="no_id">No identification shown</option>
 												<option value="fake_id">Suspected fake ID</option>
-												<option value="face_mismatch">Face doesn't match profile</option>
+												<option value="face_mismatch">Face doesn&apos;t match profile</option>
 												<option value="other">Other</option>
 											</select>
 										</div>
