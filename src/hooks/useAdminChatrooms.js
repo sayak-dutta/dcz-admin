@@ -1,36 +1,47 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminChatroomsAPI } from '@/lib/adminApi';
 
-export const useAdminChatrooms = (initialParams = {}) => {
+export const useAdminChatrooms = () => {
 	const [chatrooms, setChatrooms] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [pagination, setPagination] = useState({
+		currentPage: 1,
+		totalPages: 0,
+		hasNext: false,
+		hasPrev: false,
+	});
 
 	const fetchChatrooms = useCallback(async (params = {}) => {
 		try {
 			setLoading(true);
 			setError(null);
 
-			const queryParams = { ...initialParams, ...params };
-			const response = await adminChatroomsAPI.getAllChatrooms(queryParams);
+			const response = await adminChatroomsAPI.getAllChatrooms(params);
 
 			setChatrooms(response.data.data.chatrooms || response.data.data || []);
+			setPagination(response.data.data.pagination || {
+				currentPage: params.page || 1,
+				totalPages: Math.ceil((response.data.data.totalChatrooms || response.data.data.length || 0) / (params.limit || 20)),
+				hasNext: false,
+				hasPrev: false,
+			});
+
 			return response.data;
 		} catch (err) {
-			const errorMessage = err.response?.data?.data?.message || 'Failed to fetch chatrooms';
+			const errorMessage = err.response?.data?.message || 'Failed to fetch chatrooms';
 			setError(errorMessage);
 			console.error('Chatrooms fetch error:', err);
 			return null;
 		} finally {
 			setLoading(false);
 		}
-	}, [initialParams]);
+	}, []);
 
 	const getChatroomDetails = useCallback(async (chatroomId) => {
 		try {
 			const response = await adminChatroomsAPI.getChatroomDetails(chatroomId);
-			console.log(chatroomId);
-			return response.data.data;
+			return response.data;
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch chatroom details';
 			setError(errorMessage);
@@ -41,26 +52,24 @@ export const useAdminChatrooms = (initialParams = {}) => {
 	const updateChatroomStatus = useCallback(async (chatroomId, statusData) => {
 		try {
 			await adminChatroomsAPI.updateChatroomStatus(chatroomId, statusData);
-			await fetchChatrooms(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to update chatroom status';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchChatrooms]);
+	}, []);
 
 	const deleteChatroom = useCallback(async (chatroomId) => {
 		try {
 			await adminChatroomsAPI.deleteChatroom(chatroomId);
-			await fetchChatrooms(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to delete chatroom';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchChatrooms]);
+	}, []);
 
 	const getChatroomMessages = useCallback(async (chatroomId, params = {}) => {
 		try {
@@ -69,7 +78,7 @@ export const useAdminChatrooms = (initialParams = {}) => {
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch chatroom messages';
 			setError(errorMessage);
-			return null;
+			throw new Error(errorMessage);
 		}
 	}, []);
 
@@ -80,7 +89,7 @@ export const useAdminChatrooms = (initialParams = {}) => {
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch chatroom participants';
 			setError(errorMessage);
-			return null;
+			throw new Error(errorMessage);
 		}
 	}, []);
 
@@ -124,18 +133,15 @@ export const useAdminChatrooms = (initialParams = {}) => {
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch banned users';
 			setError(errorMessage);
-			return null;
+			throw new Error(errorMessage);
 		}
 	}, []);
-
-	useEffect(() => {
-		fetchChatrooms();
-	}, [2]);
 
 	return {
 		chatrooms,
 		loading,
 		error,
+		pagination,
 		fetchChatrooms,
 		getChatroomDetails,
 		updateChatroomStatus,
@@ -146,6 +152,6 @@ export const useAdminChatrooms = (initialParams = {}) => {
 		banParticipant,
 		unbanParticipant,
 		getBannedUsers,
-		refetch: () => fetchChatrooms(),
+		refetch: fetchChatrooms,
 	};
 };

@@ -50,6 +50,29 @@ export const adminAuthAPI = {
 	}
 };
 
+// Bans API
+export const adminBansAPI = {
+	getAllBans: (params) => adminApi.get('/api/admin/bans', { params }),
+	getBanDetails: (userId) => adminApi.get(`/api/admin/bans/${userId}`),
+};
+
+// Media Moderation API
+export const adminMediaAPI = {
+	getAllMedia: (params) => adminApi.get('/api/admin/media', { params }),
+	getMediaDetails: (mediaId) => adminApi.get(`/api/admin/media/${mediaId}`),
+	updateModerationStatus: (mediaId, statusData) => adminApi.patch(`/api/admin/media/${mediaId}/moderation`, statusData),
+	deleteMedia: (mediaId) => adminApi.delete(`/api/admin/media/${mediaId}`),
+};
+
+// Reports API
+export const adminReportsAPI = {
+	getAllReports: (params) => adminApi.get('/api/admin/reports', { params }),
+	getReportDetails: (reportId) => adminApi.get(`/api/admin/reports/${reportId}`),
+	processReport: (reportId, processData) => adminApi.post(`/api/admin/reports/${reportId}/process`, processData),
+	getReportsSummary: (params) => adminApi.get('/api/admin/reports/summary', { params }),
+	bulkProcessReports: (bulkData) => adminApi.post('/api/admin/reports/bulk-process', bulkData),
+};
+
 // Dashboard API
 export const adminDashboardAPI = {
 	getStats: () => adminApi.get('/api/admin/dashboard/stats'),
@@ -74,21 +97,6 @@ export const adminVerificationsAPI = {
 	rejectVerification: (verificationId, rejectionData) => adminApi.post(`/api/admin/verifications/${verificationId}/reject`, rejectionData),
 };
 
-// Reports API
-export const adminReportsAPI = {
-	getAllReports: (params) => adminApi.get('/api/admin/reports', { params }),
-	getReportDetails: (reportId) => adminApi.get(`/api/admin/reports/${reportId}`),
-	processReport: (reportId, processData) => adminApi.post(`/api/admin/reports/${reportId}/process`, processData),
-	getReportsSummary: (params) => adminApi.get('/api/admin/reports/summary', { params }),
-	bulkProcessReports: (bulkData) => adminApi.post('/api/admin/reports/bulk-process', bulkData),
-};
-
-// Bans API
-export const adminBansAPI = {
-	getAllBans: (params) => adminApi.get('/api/admin/bans', { params }),
-	getBanDetails: (banId) => adminApi.get(`/api/admin/bans/${banId}`),
-};
-
 // Business Requests API
 export const adminBusinessRequestsAPI = {
 	getAllBusinessRequests: (params) => adminApi.get('/api/admin/business-requests', { params }),
@@ -110,14 +118,6 @@ export const adminSubscriptionPlansAPI = {
 	updatePlan: (planId, planData) => adminApi.put(`/api/admin/subscription-plans/${planId}`, planData),
 	deletePlan: (planId) => adminApi.delete(`/api/admin/subscription-plans/${planId}`),
 	getPlanStats: (planId) => adminApi.get(`/api/admin/subscription-plans/${planId}/stats`),
-};
-
-// Media Moderation API
-export const adminMediaAPI = {
-	getAllMedia: (params) => adminApi.get('/api/admin/media', { params }),
-	getMediaDetails: (mediaId) => adminApi.get(`/api/admin/media/${mediaId}`),
-	updateModerationStatus: (mediaId, statusData) => adminApi.patch(`/api/admin/media/${mediaId}/moderation`, statusData),
-	deleteMedia: (mediaId) => adminApi.delete(`/api/admin/media/${mediaId}`),
 };
 
 // Album Moderation API
@@ -160,6 +160,23 @@ export const adminMessagesAPI = {
 	moderateConversation: (conversationId, moderationData) => adminApi.post(`/api/admin/messages/conversations/${conversationId}/moderate`, moderationData),
 	deleteMessage: (conversationId, messageId) => adminApi.delete(`/api/admin/messages/conversations/${conversationId}/messages/${messageId}`),
 	hideMessage: (conversationId, messageId, reasonData) => adminApi.post(`/api/admin/messages/conversations/${conversationId}/messages/${messageId}/hide`, reasonData),
+};
+
+// Speed Dates API
+export const adminSpeedDatesAPI = {
+	getAllSpeedDates: (params) => adminApi.get('/api/admin/speed-dates', { params }),
+	getSpeedDateDetails: (speedDateId) => adminApi.get(`/api/admin/speed-dates/${speedDateId}`),
+};
+
+// Livestreams API
+export const adminLivestreamsAPI = {
+	getAllLivestreams: (params) => adminApi.get('/api/admin/livestreams', { params }),
+	getLivestreamDetails: (livestreamId) => adminApi.get(`/api/admin/livestreams/${livestreamId}`),
+};
+
+// Updated Group Messages API
+export const adminGroupMessagesAPI = {
+	getGroupMessages: (groupId, params) => adminApi.get(`/api/admin/groups/${groupId}/messages`, { params }),
 };
 
 export default adminApi;

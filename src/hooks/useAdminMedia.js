@@ -1,20 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminMediaAPI } from '@/lib/adminApi';
 
-export const useAdminMedia = (initialParams = {}) => {
+export const useAdminMedia = () => {
 	const [media, setMedia] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [pagination, setPagination] = useState({
+		currentPage: 1,
+		totalPages: 0,
+		totalMedia: 0,
+		hasNext: false,
+		hasPrev: false,
+	});
 
 	const fetchMedia = useCallback(async (params = {}) => {
 		try {
 			setLoading(true);
 			setError(null);
 
-			const queryParams = { ...initialParams, ...params };
-			const response = await adminMediaAPI.getAllMedia(queryParams);
+			const response = await adminMediaAPI.getAllMedia(params);
 
-			setMedia(response.data.media || response.data || []);
+			setMedia(response.data.data.media || response.data.data || []);
+			setPagination(response.data.data.pagination || {
+				currentPage: params.page || 1,
+				totalPages: Math.ceil((response.data.data.totalMedia || response.data.data.length || 0) / (params.limit || 20)),
+				totalMedia: response.data.data.totalMedia || response.data.data.length || 0,
+				hasNext: false,
+				hasPrev: false,
+			});
+
 			return response.data;
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch media';
@@ -24,7 +38,7 @@ export const useAdminMedia = (initialParams = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [initialParams]);
+	}, []);
 
 	const getMediaDetails = useCallback(async (mediaId) => {
 		try {
@@ -40,39 +54,34 @@ export const useAdminMedia = (initialParams = {}) => {
 	const updateModerationStatus = useCallback(async (mediaId, statusData) => {
 		try {
 			await adminMediaAPI.updateModerationStatus(mediaId, statusData);
-			await fetchMedia(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to update media moderation status';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchMedia]);
+	}, []);
 
 	const deleteMedia = useCallback(async (mediaId) => {
 		try {
 			await adminMediaAPI.deleteMedia(mediaId);
-			await fetchMedia(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to delete media';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchMedia]);
-
-	useEffect(() => {
-		fetchMedia();
-	}, [fetchMedia]);
+	}, []);
 
 	return {
 		media,
 		loading,
 		error,
+		pagination,
 		fetchMedia,
 		getMediaDetails,
 		updateModerationStatus,
 		deleteMedia,
-		refetch: () => fetchMedia(),
+		refetch: fetchMedia,
 	};
 };

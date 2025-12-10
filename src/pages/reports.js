@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,107 +14,102 @@ import {
 	CheckCircle,
 	Clock,
 	Image,
-	Video
+	Video,
+	Loader2
 } from 'lucide-react';
-
-const mockReports = [
-	{
-		id: 1,
-		reporter: "Sarah Johnson",
-		reportedUser: "Michael Chen",
-		reportType: "Harassment",
-		description: "Received inappropriate messages and unsolicited explicit content",
-		status: "pending",
-		reportedTime: "2 hours ago",
-		responseTime: "3.2h",
-		severity: "high",
-		contentType: "message",
-		evidence: ["message1.png", "message2.png"]
-	},
-	{
-		id: 2,
-		reporter: "David Wilson",
-		reportedUser: "Emma Rodriguez",
-		reportType: "Inappropriate Content",
-		description: "Profile contains explicit images in public gallery",
-		status: "under_review",
-		reportedTime: "5 hours ago",
-		responseTime: "2.4h",
-		severity: "medium",
-		contentType: "image",
-		evidence: ["profile1.jpg", "profile2.jpg", "profile3.jpg"]
-	},
-	{
-		id: 3,
-		reporter: "System Auto-ban",
-		reportedUser: "user123",
-		reportType: "Spam message",
-		description: "Multiple users reported spam messages",
-		status: "resolved",
-		reportedTime: "2 hours ago",
-		responseTime: "3.2h",
-		severity: "low",
-		contentType: "message",
-		evidence: []
-	}
-];
-
-const statsCards = [
-	{
-		title: "Total Reports",
-		value: "142",
-		change: "↓ 12 new today",
-		color: "blue"
-	},
-	{
-		title: "Pending Review",
-		value: "24",
-		change: "↓ 8% from yesterday",
-		color: "yellow"
-	},
-	{
-		title: "Resolved Today",
-		value: "18",
-		change: "Requires attention",
-		color: "green"
-	},
-	{
-		title: "Avg Response Time",
-		value: "3.2h",
-		change: "↑ 23 new today",
-		color: "purple"
-	}
-];
+import { useAdminReports } from '@/hooks/useAdminReports';
+import { Modal } from '@/components/ui/modal';
 
 export default function ReportedContent() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('all');
+	const [selectedReport, setSelectedReport] = useState(null);
+	const [showReportModal, setShowReportModal] = useState(false);
+	const [actionReason, setActionReason] = useState('');
+
+	const {
+		reports,
+		loading,
+		error,
+		fetchReports,
+		processReport
+	} = useAdminReports();
+
+	// Fetch reports on component mount
+	useEffect(() => {
+		fetchReports();
+	}, []);
+
+	const handleProcessReport = async (reportId, action, reason = '') => {
+		const result = await processReport(reportId, {
+			action,
+			reason,
+			resolution: reason || `Report ${action}ed by admin`
+		});
+		if (result.success) {
+			// Refresh the reports list
+			fetchReports();
+			setShowReportModal(false);
+			setSelectedReport(null);
+			setActionReason('');
+		}
+	};
 
 	const getStatusBadge = (status) => {
-		switch (status.toLowerCase()) {
-			case 'pending': return <Badge variant="warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-			case 'under_review': return <Badge variant="default"><Eye className="w-3 h-3 mr-1" />Under Review</Badge>;
-			case 'resolved': return <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />Resolved</Badge>;
-			default: return <Badge variant="secondary">{status}</Badge>;
-		}
+		// Since the API doesn't provide status, we'll assume all are pending for now
+		return <Badge variant="warning"><Clock className="w-3 h-3 mr-1" />Pending Review</Badge>;
 	};
 
-	const getSeverityBadge = (severity) => {
-		switch (severity.toLowerCase()) {
-			case 'high': return <Badge variant="destructive">High</Badge>;
-			case 'medium': return <Badge variant="warning">Medium</Badge>;
-			case 'low': return <Badge variant="secondary">Low</Badge>;
-			default: return <Badge variant="secondary">{severity}</Badge>;
+	const getSeverityBadge = (reportTags) => {
+		// Determine severity based on report tags
+		if (reportTags?.includes('Harassment or Stalking')) {
+			return <Badge variant="destructive">High</Badge>;
+		} else if (reportTags?.includes('Spam / Scam')) {
+			return <Badge variant="warning">Medium</Badge>;
 		}
+		return <Badge variant="secondary">Medium</Badge>;
 	};
 
-	const getContentIcon = (type) => {
-		switch (type) {
-			case 'image': return <Image className="w-4 h-4" aria-hidden="true" />;
-			case 'video': return <Video className="w-4 h-4" aria-hidden="true" />;
-			case 'message': return <MessageSquare className="w-4 h-4" aria-hidden="true" />;
-			default: return <MessageSquare className="w-4 h-4" aria-hidden="true" />;
-		}
+	const formatReportTime = (timestamp) => {
+		if (!timestamp) return 'Unknown';
+		const date = new Date(timestamp);
+		const now = new Date();
+		const diffMs = now - date;
+		const diffHours = Math.floor(diffMs / 3600000);
+		const diffDays = Math.floor(diffMs / 86400000);
+
+		if (diffHours < 24) return `${diffHours}h ago`;
+		if (diffDays < 7) return `${diffDays}d ago`;
+		return date.toLocaleDateString();
+	};
+
+	const getStatsCards = () => {
+		return [
+			{
+				title: "Total Reports",
+				value: reports.length.toString(),
+				change: "All reported content",
+				color: "blue"
+			},
+			{
+				title: "Pending Review",
+				value: reports.length.toString(),
+				change: "Requires attention",
+				color: "yellow"
+			},
+			{
+				title: "High Priority",
+				value: reports.filter(r => r.reportTags?.includes('Harassment or Stalking')).length.toString(),
+				change: "Urgent cases",
+				color: "red"
+			},
+			{
+				title: "Spam Reports",
+				value: reports.filter(r => r.reportTags?.includes('Spam / Scam')).length.toString(),
+				change: "Spam/scam content",
+				color: "purple"
+			}
+		];
 	};
 
 	return (
@@ -127,7 +122,7 @@ export default function ReportedContent() {
 
 				{/* Stats Cards */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-					{statsCards.map((stat, index) => (
+					{getStatsCards().map((stat, index) => (
 						<Card key={index}>
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
@@ -183,140 +178,179 @@ export default function ReportedContent() {
 				</Card>
 
 				{/* Reports List */}
-				<div className="space-y-4">
-					{mockReports.map((report) => (
-						<Card key={report.id}>
-							<CardContent className="p-6">
-								<div className="flex items-start justify-between">
-									<div className="flex-1">
-										<div className="flex items-center space-x-4 mb-3">
-											<div className="flex items-center space-x-2">
-												{getContentIcon(report.contentType)}
-												<h3 className="font-semibold">{report.reportType}</h3>
+				{loading ? (
+					<div className="flex items-center justify-center p-8">
+						<Loader2 className="w-6 h-6 animate-spin mr-2" />
+						Loading reports...
+					</div>
+				) : error ? (
+					<div className="text-center p-8 text-red-600">
+						Error: {error}
+					</div>
+				) : (
+					<div className="space-y-4">
+						{reports.length > 0 ? reports.map((report) => (
+							<Card key={report._id}>
+								<CardContent className="p-6">
+									<div className="flex items-start justify-between">
+										<div className="flex-1">
+											<div className="flex items-center space-x-4 mb-3">
+												<div className="flex items-center space-x-2">
+													<MessageSquare className="w-4 h-4" />
+													<h3 className="font-semibold">
+														{report.reportTags?.join(', ') || 'Report'}
+													</h3>
+												</div>
+												{getStatusBadge('pending')}
+												{getSeverityBadge(report.reportTags)}
 											</div>
-											{getStatusBadge(report.status)}
-											{getSeverityBadge(report.severity)}
-										</div>
 
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-											<div>
-												<p className="text-sm text-gray-600 mb-2">
-													<strong>Reported by:</strong> {report.reporter}
-												</p>
-												<p className="text-sm text-gray-600 mb-2">
-													<strong>Reported user:</strong> {report.reportedUser}
-												</p>
-												<p className="text-sm text-gray-600">
-													<strong>Reported:</strong> {report.reportedTime}
-												</p>
-											</div>
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+												<div>
+													<p className="text-sm text-gray-600 mb-2">
+														<strong>Reported by:</strong> {report.userId?.username || 'Unknown'}
+														{report.userId?.profile?.firstName && report.userId?.profile?.lastName &&
+															` (${report.userId.profile.firstName} ${report.userId.profile.lastName})`}
+													</p>
+													<p className="text-sm text-gray-600 mb-2">
+														<strong>Reported user:</strong> {report.targetUserId?.username || 'Unknown'}
+														{report.targetUserId?.profile?.firstName && report.targetUserId?.profile?.lastName &&
+															` (${report.targetUserId.profile.firstName} ${report.targetUserId.profile.lastName})`}
+													</p>
+													<p className="text-sm text-gray-600">
+														<strong>Reported:</strong> {formatReportTime(report.timestamp)}
+													</p>
+												</div>
 
-											<div>
-												<p className="text-sm text-gray-600 mb-2">
-													<strong>Response time:</strong> {report.responseTime}
-												</p>
-												<p className="text-sm text-gray-600">
-													<strong>Evidence:</strong> {report.evidence.length} items
-												</p>
-											</div>
-										</div>
-
-										<div className="mb-4">
-											<p className="text-sm text-gray-600 mb-2">
-												<strong>Description:</strong>
-											</p>
-											<p className="text-sm bg-gray-50 p-3 rounded">
-												{report.description}
-											</p>
-										</div>
-
-										{report.evidence.length > 0 && (
-											<div className="mb-4">
-												<p className="text-sm text-gray-600 mb-2">
-													<strong>Evidence:</strong>
-												</p>
-												<div className="flex space-x-2">
-													{report.evidence.slice(0, 7).map((evidence, index) => (
-														<div key={index} className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
-															{evidence.includes('.jpg') || evidence.includes('.png') ?
-																<Image className="w-6 h-6 text-gray-500" aria-hidden="true" /> :
-																<Video className="w-6 h-6 text-gray-500" aria-hidden="true" />
-															}
-														</div>
-													))}
-													{report.evidence.length > 7 && (
-														<div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center">
-															<span className="text-xs text-gray-500">+{report.evidence.length - 7}</span>
-														</div>
-													)}
+												<div>
+													<p className="text-sm text-gray-600 mb-2">
+														<strong>Report Type:</strong> {report.interactionType}
+													</p>
+													<p className="text-sm text-gray-600">
+														<strong>Match Status:</strong> {report.isMatch ? 'Match' : 'No Match'}
+													</p>
 												</div>
 											</div>
-										)}
-									</div>
 
-									<div className="flex flex-col space-y-2 ml-4">
-										<Button size="sm" className="bg-red-600 hover:bg-red-700">
-											<Ban className="w-4 h-4 mr-2" />
-											Ban User
-										</Button>
-										<Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">
-											<AlertTriangle className="w-4 h-4 mr-2" />
-											Warn User
-										</Button>
-										<Button size="sm" className="bg-green-600 hover:bg-green-700">
-											<CheckCircle className="w-4 h-4 mr-2" />
-											Dismiss Report
-										</Button>
-									</div>
-								</div>
-
-								<div className="mt-4 pt-4 border-t">
-									<div className="flex justify-between items-center">
-										<div className="text-sm text-gray-500">
-											Action Reason (if applicable)
+											{report.reportTags && report.reportTags.length > 0 && (
+												<div className="mb-4">
+													<p className="text-sm text-gray-600 mb-2">
+														<strong>Report Tags:</strong>
+													</p>
+													<div className="flex flex-wrap gap-2">
+														{report.reportTags.map((tag, index) => (
+															<Badge key={index} variant="outline">
+																{tag}
+															</Badge>
+														))}
+													</div>
+												</div>
+											)}
 										</div>
-										<Button variant="link" size="sm">
-											View full conversation
-										</Button>
-									</div>
-									<select className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-										<option value="">Select Reason</option>
-										<option value="harassment">Harassment</option>
-										<option value="inappropriate">Inappropriate Content</option>
-										<option value="spam">Spam</option>
-										<option value="fake">Fake Profile</option>
-										<option value="other">Other</option>
-									</select>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
 
-				{/* Pagination */}
-				<div className="flex items-center justify-center space-x-2">
-					<Button variant="outline" size="sm" disabled>
-						Previous
-					</Button>
-					<Button variant="outline" size="sm" className="bg-blue-600 text-white">
-						1
-					</Button>
-					<Button variant="outline" size="sm">
-						2
-					</Button>
-					<Button variant="outline" size="sm">
-						3
-					</Button>
-					<Button variant="outline" size="sm">
-						...
-					</Button>
-					<Button variant="outline" size="sm">
-						8
-					</Button>
-					<Button variant="outline" size="sm">
-						Next
-					</Button>
-				</div>
+										<div className="flex flex-col space-y-2 ml-4">
+											<Button
+												size="sm"
+												className="bg-red-600 hover:bg-red-700"
+												onClick={() => {
+													setSelectedReport(report);
+													setShowReportModal(true);
+												}}
+											>
+												<Ban className="w-4 h-4 mr-2" />
+												Take Action
+											</Button>
+											<Button size="sm" variant="outline">
+												<Eye className="w-4 h-4 mr-2" />
+												View Details
+											</Button>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						)) : (
+							<div className="text-center py-8 text-gray-500">
+								<AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+								<p>No reports found</p>
+							</div>
+						)}
+					</div>
+				)}
+
+				{/* Report Action Modal */}
+				<Modal
+					isOpen={showReportModal}
+					onClose={() => {
+						setShowReportModal(false);
+						setSelectedReport(null);
+						setActionReason('');
+					}}
+					title="Take Action on Report"
+				>
+					{selectedReport && (
+						<div className="space-y-4">
+							<div className="p-4 bg-gray-50 rounded-lg">
+								<h4 className="font-medium mb-2">Report Details</h4>
+								<p className="text-sm text-gray-600 mb-2">
+									<strong>Reporter:</strong> {selectedReport.userId?.username || 'Unknown'}
+								</p>
+								<p className="text-sm text-gray-600 mb-2">
+									<strong>Reported User:</strong> {selectedReport.targetUserId?.username || 'Unknown'}
+								</p>
+								<p className="text-sm text-gray-600">
+									<strong>Tags:</strong> {selectedReport.reportTags?.join(', ') || 'None'}
+								</p>
+							</div>
+
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Action Reason (Optional)
+								</label>
+								<textarea
+									className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+									rows={3}
+									placeholder="Enter reason for the action taken..."
+									value={actionReason}
+									onChange={(e) => setActionReason(e.target.value)}
+								/>
+							</div>
+
+							<div className="flex justify-end space-x-2 pt-4 border-t">
+								<Button
+									variant="outline"
+									onClick={() => {
+										setShowReportModal(false);
+										setSelectedReport(null);
+										setActionReason('');
+									}}
+								>
+									Cancel
+								</Button>
+								<Button
+									className="bg-yellow-600 hover:bg-yellow-700"
+									onClick={() => handleProcessReport(selectedReport._id, 'warn', actionReason)}
+								>
+									<AlertTriangle className="w-4 h-4 mr-2" />
+									Warn User
+								</Button>
+								<Button
+									className="bg-red-600 hover:bg-red-700"
+									onClick={() => handleProcessReport(selectedReport._id, 'ban', actionReason)}
+								>
+									<Ban className="w-4 h-4 mr-2" />
+									Ban User
+								</Button>
+								<Button
+									className="bg-green-600 hover:bg-green-700"
+									onClick={() => handleProcessReport(selectedReport._id, 'none', actionReason)}
+								>
+									<CheckCircle className="w-4 h-4 mr-2" />
+									Dismiss Report
+								</Button>
+							</div>
+						</div>
+					)}
+				</Modal>
 			</div>
 		</Layout>
 	);

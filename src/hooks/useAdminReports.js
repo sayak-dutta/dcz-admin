@@ -15,7 +15,7 @@ export const useAdminReports = (initialParams = {}) => {
 			const queryParams = { ...initialParams, ...params };
 			const response = await adminReportsAPI.getAllReports(queryParams);
 
-			setReports(response.data.reports || response.data || []);
+			setReports(response.data.data.reports || response.data.data || []);
 			return response.data;
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch reports';
@@ -76,7 +76,7 @@ export const useAdminReports = (initialParams = {}) => {
 
 	useEffect(() => {
 		fetchReports();
-	}, [fetchReports]);
+	}, [2]);
 
 	return {
 		reports,

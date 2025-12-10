@@ -1,20 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminGroupsAPI } from '@/lib/adminApi';
+import { adminGroupsAPI, adminGroupMessagesAPI } from '@/lib/adminApi';
 
-export const useAdminGroups = (initialParams = {}) => {
+export const useAdminGroups = () => {
 	const [groups, setGroups] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [pagination, setPagination] = useState({
+		currentPage: 1,
+		totalPages: 0,
+		totalGroups: 0,
+		hasNext: false,
+		hasPrev: false,
+	});
 
 	const fetchGroups = useCallback(async (params = {}) => {
 		try {
 			setLoading(true);
 			setError(null);
 
-			const queryParams = { ...initialParams, ...params };
-			const response = await adminGroupsAPI.getAllGroups(queryParams);
+			const response = await adminGroupsAPI.getAllGroups(params);
 
-			setGroups(response.data.groups || response.data || []);
+			setGroups(response.data.data.groups || response.data.data || []);
+			setPagination(response.data.data.pagination || {
+				currentPage: params.page || 1,
+				totalPages: Math.ceil((response.data.data.totalGroups || response.data.data.length || 0) / (params.limit || 20)),
+				totalGroups: response.data.data.totalGroups || response.data.data.length || 0,
+				hasNext: false,
+				hasPrev: false,
+			});
+
 			return response.data;
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch groups';
@@ -24,7 +38,7 @@ export const useAdminGroups = (initialParams = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [initialParams]);
+	}, []);
 
 	const getGroupDetails = useCallback(async (groupId) => {
 		try {
@@ -40,26 +54,24 @@ export const useAdminGroups = (initialParams = {}) => {
 	const updateGroupStatus = useCallback(async (groupId, statusData) => {
 		try {
 			await adminGroupsAPI.updateGroupStatus(groupId, statusData);
-			await fetchGroups(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to update group status';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchGroups]);
+	}, []);
 
 	const deleteGroup = useCallback(async (groupId) => {
 		try {
 			await adminGroupsAPI.deleteGroup(groupId);
-			await fetchGroups(); // Refresh the list
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to delete group';
 			setError(errorMessage);
 			return { success: false, error: errorMessage };
 		}
-	}, [fetchGroups]);
+	}, []);
 
 	const getGroupMembers = useCallback(async (groupId, params = {}) => {
 		try {
@@ -68,35 +80,32 @@ export const useAdminGroups = (initialParams = {}) => {
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to fetch group members';
 			setError(errorMessage);
-			return null;
+			throw new Error(errorMessage);
 		}
 	}, []);
 
-	const getGroupPosts = useCallback(async (groupId, params = {}) => {
+	const getGroupMessages = useCallback(async (groupId, params = {}) => {
 		try {
-			const response = await adminGroupsAPI.getGroupPosts(groupId, params);
+			const response = await adminGroupMessagesAPI.getGroupMessages(groupId, params);
 			return response.data;
 		} catch (err) {
-			const errorMessage = err.response?.data?.message || 'Failed to fetch group posts';
+			const errorMessage = err.response?.data?.message || 'Failed to fetch group messages';
 			setError(errorMessage);
-			return null;
+			throw new Error(errorMessage);
 		}
 	}, []);
-
-	useEffect(() => {
-		fetchGroups();
-	}, [fetchGroups]);
 
 	return {
 		groups,
 		loading,
 		error,
+		pagination,
 		fetchGroups,
 		getGroupDetails,
 		updateGroupStatus,
 		deleteGroup,
 		getGroupMembers,
-		getGroupPosts,
-		refetch: () => fetchGroups(),
+		getGroupMessages,
+		refetch: fetchGroups,
 	};
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,80 +20,92 @@ import {
 	Eye,
 	Calendar,
 	AlertTriangle,
-	CheckCircle
+	CheckCircle,
+	Loader2
 } from 'lucide-react';
-
-const mockBannedUsers = [
-	{
-		id: 1,
-		name: "John Doe",
-		email: "john.doe@example.com",
-		banType: "Permanent",
-		banDate: "15 May 2025",
-		banReason: "Multiple violations of community guidelines including...",
-		bannedBy: "Admin (Sarah)",
-		avatar: null
-	},
-	{
-		id: 2,
-		name: "Jane Smith",
-		email: "jane.smith@example.com",
-		banType: "Temporary (7 days)",
-		banDate: "1 Jun 2025",
-		banReason: "Spamming other members with...",
-		bannedBy: "System (Auto-ban)",
-		avatar: null
-	},
-	{
-		id: 3,
-		name: "Robert Johnson",
-		email: "robert.j@example.com",
-		banType: "Permanent",
-		banDate: "20 Apr 2025",
-		banReason: "Fake profile and fraudulent activity...",
-		bannedBy: "Admin (Michael)",
-		avatar: null
-	}
-];
-
-const statsCards = [
-	{
-		title: "Total Banned Users",
-		value: "327",
-		change: "↓ 5% from last week",
-		color: "red"
-	},
-	{
-		title: "Banned This Week",
-		value: "24",
-		change: "↓ 8% from yesterday",
-		color: "orange"
-	},
-	{
-		title: "Permanent Bans",
-		value: "189",
-		change: "Requires attention",
-		color: "red"
-	},
-	{
-		title: "Temporary Bans",
-		value: "138",
-		change: "↑ 23 new today",
-		color: "yellow"
-	}
-];
+import { useAdminBans } from '@/hooks/useAdminBans';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function BannedUsers() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [banTypeFilter, setBanTypeFilter] = useState('all');
+	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedUser, setSelectedUser] = useState(null);
+	const [showUnbanDialog, setShowUnbanDialog] = useState(false);
 
-	const getBanTypeBadge = (banType) => {
-		if (banType.toLowerCase().includes('permanent')) {
-			return <Badge variant="destructive">Permanent</Badge>;
-		} else if (banType.toLowerCase().includes('temporary')) {
-			return <Badge variant="warning">Temporary</Badge>;
+	const {
+		bans,
+		loading,
+		error,
+		pagination,
+		fetchBans,
+		unbanUser
+	} = useAdminBans();
+
+	// Fetch bans on component mount and when filters/page change
+	useEffect(() => {
+		const delay = searchTerm ? 500 : 0; // Debounce search
+
+		const timeoutId = setTimeout(() => {
+			fetchBans({
+				page: currentPage,
+				limit: 20,
+				search: searchTerm || undefined,
+			});
+		}, delay);
+
+		return () => clearTimeout(timeoutId);
+	}, [searchTerm, currentPage, fetchBans]);
+
+	const handleUnbanUser = (user) => {
+		setSelectedUser(user);
+		setShowUnbanDialog(true);
+	};
+
+	const confirmUnbanUser = async () => {
+		if (!selectedUser) return;
+
+		const result = await unbanUser({
+			id: selectedUser.userId._id, // Use userId from the ban object
+			removalReason: 'Unbanned by admin',
+		});
+
+		if (result.success) {
+			setShowUnbanDialog(false);
+			setSelectedUser(null);
+			// The hook already refreshes the list, so no need to call fetchBans again
+		} else {
+			console.error('Failed to unban user:', result.error);
 		}
-		return <Badge variant="secondary">{banType}</Badge>;
+	};
+
+	const getStatsCards = () => {
+		return [
+			{
+				title: "Total Banned Users",
+				value: pagination.totalBans?.toString() || "0",
+				change: "Current active bans",
+				color: "red"
+			},
+			{
+				title: "Current Page",
+				value: currentPage.toString(),
+				change: `of ${pagination.totalPages || 1} pages`,
+				color: "blue"
+			},
+			{
+				title: "Users per Page",
+				value: "20",
+				change: "Items displayed",
+				color: "green"
+			},
+			{
+				title: "Search Results",
+				value: bans.length.toString(),
+				change: searchTerm ? `for "${searchTerm}"` : "All results",
+				color: "purple"
+			}
+		];
 	};
 
 	return (
@@ -106,7 +118,7 @@ export default function BannedUsers() {
 
 				{/* Stats Cards */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-					{statsCards.map((stat, index) => (
+					{getStatsCards().map((stat, index) => (
 						<Card key={index}>
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
@@ -160,109 +172,137 @@ export default function BannedUsers() {
 					</CardHeader>
 
 					<CardContent>
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>User</TableHead>
-									<TableHead>Ban Type</TableHead>
-									<TableHead>Ban Date</TableHead>
-									<TableHead>Ban Reason</TableHead>
-									<TableHead>Banned By</TableHead>
-									<TableHead className="text-right">Actions</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{mockBannedUsers.map((user) => (
-									<TableRow key={user.id}>
-										<TableCell>
-											<div className="flex items-center space-x-3">
-												<div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-													<span className="text-red-600 font-semibold text-xs">
-														{user.name.split(' ').map(n => n[0]).join('')}
-													</span>
-												</div>
-												<div>
-													<p className="font-medium text-sm">{user.name}</p>
-													<p className="text-xs text-gray-500">{user.email}</p>
-												</div>
-											</div>
-										</TableCell>
-										<TableCell>
-											{getBanTypeBadge(user.banType)}
-										</TableCell>
-										<TableCell className="text-sm">{user.banDate}</TableCell>
-										<TableCell className="text-sm max-w-xs">
-											<div className="truncate" title={user.banReason}>
-												{user.banReason}
-											</div>
-										</TableCell>
-										<TableCell className="text-sm">{user.bannedBy}</TableCell>
-										<TableCell className="text-right">
-											<div className="flex items-center justify-end space-x-2">
-												<Button size="sm" variant="ghost">
-													<Eye className="w-4 h-4" />
-												</Button>
-												<Button size="sm" variant="ghost">
-													<RotateCcw className="w-4 h-4" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</CardContent>
-				</Card>
-
-				{/* Bulk Actions */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Bulk Actions</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center space-x-4">
-							<div className="flex items-center space-x-2">
-								<input type="checkbox" id="selectAll" className="rounded" />
-								<label htmlFor="selectAll" className="text-sm">
-									Select all 327 banned users
-								</label>
+						{loading ? (
+							<div className="flex items-center justify-center p-8">
+								<Loader2 className="w-6 h-6 animate-spin mr-2" />
+								Loading banned users...
 							</div>
-							<Button variant="outline" size="sm">
-								Apply to selected
-							</Button>
-						</div>
+						) : error ? (
+							<div className="text-center p-8 text-red-600">
+								Error: {error}
+							</div>
+						) : (
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>User</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead>Username</TableHead>
+										<TableHead>Email</TableHead>
+										<TableHead className="text-right">Actions</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{bans.length > 0 ? bans.map((user) => (
+										<TableRow key={user._id}>
+											<TableCell>
+												<div className="flex items-center space-x-3">
+													<div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+														<span className="text-red-600 font-semibold text-xs">
+															{user.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+														</span>
+													</div>
+													<div>
+														<p className="font-medium text-sm">
+															{user.userId?.profile?.firstName && user.userId?.profile?.lastName
+																? `${user.userId.profile.firstName} ${user.userId.profile.lastName}`
+																: user.username || 'Unknown User'}
+														</p>
+														<p className="text-xs text-gray-500">{user.email}</p>
+													</div>
+												</div>
+											</TableCell>
+											<TableCell>
+												<Badge variant="destructive">Banned</Badge>
+											</TableCell>
+											{console.log(user)
+											}
+											<TableCell className="text-sm">{user.userId?.username || 'N/A'}</TableCell>
+											<TableCell className="text-sm">{user.userId?.email}</TableCell>
+											<TableCell className="text-right">
+												<div className="flex items-center justify-end space-x-2">
+													<Button size="sm" variant="ghost" title="View user details">
+														<Eye className="w-4 h-4" />
+													</Button>
+													<Button
+														size="sm"
+														variant="ghost"
+														onClick={() => handleUnbanUser(user)}
+														title="Unban user"
+													>
+														<RotateCcw className="w-4 h-4" />
+													</Button>
+												</div>
+											</TableCell>
+										</TableRow>
+									)) : (
+										<TableRow>
+											<TableCell colSpan={5} className="text-center py-8 text-gray-500">
+												<UserX className="w-8 h-8 mx-auto mb-2 opacity-50" />
+												<p>No banned users found</p>
+											</TableCell>
+										</TableRow>
+									)}
+								</TableBody>
+							</Table>
+						)}
 					</CardContent>
 				</Card>
 
 				{/* Pagination */}
-				<div className="flex items-center justify-between">
-					<p className="text-sm text-muted-foreground">
-						Showing 1 to 3 of 327 results
-					</p>
-					<div className="flex space-x-2">
-						<Button variant="outline" size="sm" disabled>
-							Previous
-						</Button>
-						<Button variant="outline" size="sm" className="bg-blue-600 text-white">
-							1
-						</Button>
-						<Button variant="outline" size="sm">
-							2
-						</Button>
-						<Button variant="outline" size="sm">
-							3
-						</Button>
-						<Button variant="outline" size="sm">
-							...
-						</Button>
-						<Button variant="outline" size="sm">
-							11
-						</Button>
-						<Button variant="outline" size="sm">
-							Next
-						</Button>
+				{!loading && bans.length > 0 && (
+					<div className="flex items-center justify-between">
+						<p className="text-sm text-muted-foreground">
+							Showing {((pagination.currentPage - 1) * 20) + 1} to {Math.min(pagination.currentPage * 20, pagination.totalBans)} of {pagination.totalBans} results
+						</p>
+						<div className="flex space-x-2">
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={!pagination.hasPrev}
+								onClick={() => setCurrentPage(pagination.currentPage - 1)}
+							>
+								Previous
+							</Button>
+							{[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
+								const pageNum = i + Math.max(1, pagination.currentPage - 2);
+								if (pageNum > pagination.totalPages) return null;
+								return (
+									<Button
+										key={pageNum}
+										variant="outline"
+										size="sm"
+										className={pageNum === pagination.currentPage ? "bg-blue-600 text-white" : ""}
+										onClick={() => setCurrentPage(pageNum)}
+									>
+										{pageNum}
+									</Button>
+								);
+							})}
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={!pagination.hasNext}
+								onClick={() => setCurrentPage(pagination.currentPage + 1)}
+							>
+								Next
+							</Button>
+						</div>
 					</div>
-				</div>
+				)}
+
+				{/* Unban User Confirmation Dialog */}
+				<ConfirmDialog
+					isOpen={showUnbanDialog}
+					onClose={() => {
+						setShowUnbanDialog(false);
+						setSelectedUser(null);
+					}}
+					onConfirm={confirmUnbanUser}
+					title="Unban User"
+					description={`Are you sure you want to unban ${selectedUser?.username || selectedUser?.email}? The user will regain access to the platform.`}
+					confirmLabel="Unban User"
+				/>
 			</div>
 		</Layout>
 	);
