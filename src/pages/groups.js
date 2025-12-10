@@ -85,10 +85,10 @@ export default function GroupsPage() {
 			// API returns: { success, message, data: { messages, pagination } }
 			// Hook returns response.data, so messagesResponse = { success, message, data: {...} }
 			console.log('Group Messages Response:', messagesResponse);
-			
+
 			const messages = messagesResponse?.data?.messages || messagesResponse?.messages || [];
 			console.log('Parsed Group Messages:', messages);
-			
+
 			setGroupMessages(messages);
 		} catch (error) {
 			console.error('Failed to fetch group details:', error);
@@ -471,14 +471,14 @@ export default function GroupsPage() {
 														<div className="flex items-center space-x-2 mb-1">
 															<span className="font-medium text-sm">
 																{console.log(message)}
-																{message.sender?.username? `${message.sender?.username}`
+																{message.sender?.username ? `${message.sender?.username}`
 																	: message.senderId?.username || message.userId?.profile?.firstName && message.userId?.profile?.lastName
 																		? `${message.userId.profile.firstName} ${message.userId.profile.lastName}`
 																		: message.userId?.username || message.senderId?.username || 'Unknown User'}
 															</span>
 															<span className="text-xs text-gray-500">
-																{message.timestamp ? new Date(message.timestamp).toLocaleString() : 
-																 message.createdAt ? new Date(message.createdAt).toLocaleString() : ''}
+																{message.timestamp ? new Date(message.timestamp).toLocaleString() :
+																	message.createdAt ? new Date(message.createdAt).toLocaleString() : ''}
 															</span>
 															{message.messageType && (
 																<Badge variant="outline" className="text-xs">{message.messageType}</Badge>
