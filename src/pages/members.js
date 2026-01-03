@@ -101,14 +101,14 @@ export default function AllMembers() {
 			reason: 'Banned by admin'
 		});
 
-		if (result.success) {
+			if (result.success) {
 			setShowBanDialog(false);
 			setSelectedUser(null);
 			// Success message could be added here with a toast notification
-		} else {
+			} else {
 			// Error message could be added here with a toast notification
 			console.error('Failed to ban user:', result.error);
-		}
+			}
 	};
 
 	const handleUnbanUser = async (userId) => {

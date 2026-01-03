@@ -16,7 +16,9 @@ import {
 	DollarSign,
 	Mail,
 	Palette,
-	Monitor
+	Monitor,
+	FileText,
+	Shield
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -63,14 +65,14 @@ const sidebarItems = [
 	//       { name: "Revenue Reports", href: "/analytics/revenue", icon: DollarSign },
 	//     ]
 	//   },
-	//   {
-	//     title: "SYSTEM SETTINGS",
-	//     items: [
-	//       { name: "Payment Configuration", href: "/settings/payment", icon: DollarSign },
-	//       { name: "Email Templates", href: "/settings/email", icon: Mail },
-	//       { name: "API Settings", href: "/settings/api", icon: Settings },
-	//     ]
-	//   }
+	{
+		title: "SYSTEM SETTINGS",
+		items: [
+			{ name: "Subscription Plans", href: "/settings/plans", icon: DollarSign },
+			{ name: "Privacy Policy", href: "/settings/privacy", icon: Shield },
+			{ name: "Terms of Service", href: "/settings/terms", icon: FileText },
+		]
+	}
 ];
 
 export default function Sidebar() {

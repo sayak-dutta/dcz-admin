@@ -179,4 +179,22 @@ export const adminGroupMessagesAPI = {
 	getGroupMessages: (groupId, params) => adminApi.get(`/api/admin/groups/${groupId}/messages`, { params }),
 };
 
+// Plans Management API (using /api/admin/plans endpoint)
+export const adminPlansAPI = {
+	getAllPlans: (params) => adminApi.get('/api/admin/subscription-plans', { params }), // Use subscription-plans for listing
+	createPlan: (planData) => adminApi.post('/api/admin/plans', planData),
+	updatePlan: (planId, planData) => adminApi.put(`/api/admin/plans/${planId}`, planData),
+	deletePlan: (planId) => adminApi.delete(`/api/admin/plans/${planId}`),
+	getPlanStats: (planId) => adminApi.get(`/api/admin/plans/${planId}/stats`),
+	bulkUpdatePlans: (bulkData) => adminApi.patch('/api/admin/plans/bulk-update', bulkData),
+};
+
+// App Content Management API
+export const adminAppContentAPI = {
+	getPrivacyPolicy: () => adminApi.get('/api/admin/app-content/privacy'),
+	updatePrivacyPolicy: (contentData) => adminApi.put('/api/admin/app-content/privacy', contentData),
+	getTermsOfService: () => adminApi.get('/api/admin/app-content/terms'),
+	updateTermsOfService: (contentData) => adminApi.put('/api/admin/app-content/terms', contentData),
+};
+
 export default adminApi;

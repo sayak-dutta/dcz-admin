@@ -1700,6 +1700,68 @@
 						},
 						"description": "Get all posts from a specific group."
 					}
+				},
+				{
+					"name": "Get Group Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/groups/:id/messages?page=1&limit=50&includeDeleted=false&messageType=text",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"groups",
+								":id",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "before",
+									"value": "2025-12-31T23:59:59.000Z",
+									"description": "Get messages before this timestamp (for pagination)"
+								},
+								{
+									"key": "includeDeleted",
+									"value": "false",
+									"description": "Include deleted messages in results"
+								},
+								{
+									"key": "messageType",
+									"value": "text",
+									"description": "Filter by message type: 'text', 'image', 'voice', 'video', 'file', 'system'"
+								},
+								{
+									"key": "senderId",
+									"value": "user_id_here",
+									"description": "Filter messages by sender user ID"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "group_id_here"
+								}
+							]
+						},
+						"description": "Get all messages from a specific group for moderation. Returns messages with populated sender, replyTo, mentions, and deletedBy details. Requires 'content:moderate' permission."
+					}
 				}
 			]
 		},
@@ -1905,7 +1967,7 @@
 								}
 							]
 						},
-						"description": "Get all messages from a specific chatroom."
+						"description": "Get all messages from a specific chatroom. Returns messages with populated user details and chatroom info. Messages are sorted by timestamp (newest first) and reversed in response (oldest first). Requires 'admin:settings' permission."
 					}
 				},
 				{
@@ -2364,7 +2426,7 @@
 			]
 		},
 		{
-			"name": "Speed Dates",
+			"name": "Speed Dates Moderation",
 			"item": [
 				{
 					"name": "Get All Speed Dates",
@@ -2377,7 +2439,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/speed-dates?page=1&limit=20&status=active&sortBy=createdAt&sortOrder=desc",
+							"raw": "{{base_url}}/api/admin/speed-dates?page=1&limit=20&status=active&type=public&sortBy=createdAt&sortOrder=desc",
 							"host": [
 								"{{base_url}}"
 							],
@@ -2398,7 +2460,27 @@
 								{
 									"key": "status",
 									"value": "active",
-									"description": "Filter by status: active, completed, cancelled"
+									"description": "Filter by status: 'active', 'completed', 'cancelled'"
+								},
+								{
+									"key": "type",
+									"value": "public",
+									"description": "Filter by type: 'private', 'public', 'virtual'"
+								},
+								{
+									"key": "startDate",
+									"value": "2025-01-01",
+									"description": "Filter speed dates starting on or after this date"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-31",
+									"description": "Filter speed dates starting on or before this date"
+								},
+								{
+									"key": "creatorId",
+									"value": "user_id_here",
+									"description": "Filter by creator user ID"
 								},
 								{
 									"key": "sortBy",
@@ -2410,7 +2492,7 @@
 								}
 							]
 						},
-						"description": "Get all speed dates with pagination and filters."
+						"description": "Get all speed dates with pagination and filters for moderation. Requires 'content:moderate' permission."
 					}
 				},
 				{
@@ -2441,13 +2523,372 @@
 								}
 							]
 						},
-						"description": "Get detailed information about a specific speed date."
+						"description": "Get detailed information about a specific speed date. Requires 'content:moderate' permission."
 					}
 				}
 			]
 		},
 		{
-			"name": "Livestreams",
+			"name": "Group Messages Moderation",
+			"item": [
+				{
+					"name": "Get Group Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/groups/:id/messages?page=1&limit=50&includeDeleted=false&messageType=text",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"groups",
+								":id",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "before",
+									"value": "2025-12-31T23:59:59.000Z",
+									"description": "Get messages before this timestamp (for pagination)"
+								},
+								{
+									"key": "includeDeleted",
+									"value": "false",
+									"description": "Include deleted messages in results"
+								},
+								{
+									"key": "messageType",
+									"value": "text",
+									"description": "Filter by message type: 'text', 'image', 'voice', 'video', 'file', 'system'"
+								},
+								{
+									"key": "senderId",
+									"value": "user_id_here",
+									"description": "Filter messages by sender user ID"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "group_id_here"
+								}
+							]
+						},
+						"description": "Get all messages from a specific group for moderation. Returns messages with populated sender, replyTo, mentions, and deletedBy details. Requires 'content:moderate' permission."
+					}
+				}
+			]
+		},
+		{
+			"name": "Plans Management",
+			"item": [
+				{
+					"name": "Create Subscription Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Premium Monthly\",\n  \"description\": \"Premium subscription with all features\",\n  \"price\": {\n    \"amount\": 999,\n    \"currency\": \"INR\"\n  },\n  \"duration\": {\n    \"value\": 1,\n    \"unit\": \"months\"\n  },\n  \"features\": [\"Unlimited likes\", \"See who liked you\", \"Advanced filters\"],\n  \"permissions\": [\"premium_filters\", \"see_likes\", \"unlimited_swipes\"],\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/plans",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"plans"
+							]
+						},
+						"description": "Create a new subscription plan. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Update Subscription Plan",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Premium Monthly Updated\",\n  \"description\": \"Premium subscription with all features updated\",\n  \"price\": {\n    \"amount\": 1099,\n    \"currency\": \"INR\"\n  },\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/plans/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"plans",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "plan_id_here"
+								}
+							]
+						},
+						"description": "Update an existing subscription plan. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Delete Subscription Plan",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/plans/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"plans",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "plan_id_here"
+								}
+							]
+						},
+						"description": "Soft delete a subscription plan. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Get Plan Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/plans/:id/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"plans",
+								":id",
+								"stats"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "plan_id_here"
+								}
+							]
+						},
+						"description": "Get statistics for a specific subscription plan. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Bulk Update Plans",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planIds\": [\"plan_id_1\", \"plan_id_2\"],\n  \"updates\": {\n    \"isActive\": false,\n    \"price\": {\n      \"amount\": 799\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/plans/bulk-update",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"plans",
+								"bulk-update"
+							]
+						},
+						"description": "Bulk update multiple subscription plans. Requires admin authentication."
+					}
+				}
+			]
+		},
+		{
+			"name": "App Content Management",
+			"item": [
+				{
+					"name": "Get Privacy Policy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/app-content/privacy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"app-content",
+								"privacy"
+							]
+						},
+						"description": "Get privacy policy content for admin management. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Update Privacy Policy",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"<h1>Privacy Policy</h1><p>This is our updated privacy policy...</p>\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/app-content/privacy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"app-content",
+								"privacy"
+							]
+						},
+						"description": "Update privacy policy content. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Get Terms of Service",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/app-content/terms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"terms"
+							]
+						},
+						"description": "Get terms of service content for admin management. Requires admin authentication."
+					}
+				},
+				{
+					"name": "Update Terms of Service",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"<h1>Terms of Service</h1><p>These are our updated terms...</p>\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/app-content/terms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"app-content",
+								"terms"
+							]
+						},
+						"description": "Update terms of service content. Requires admin authentication."
+					}
+				}
+			]
+		},
+		{
+			"name": "Livestreams Moderation",
 			"item": [
 				{
 					"name": "Get All Livestreams",
@@ -2460,7 +2901,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/livestreams?page=1&limit=20&isLive=true&isApproved=true&sortBy=createdAt&sortOrder=desc",
+							"raw": "{{base_url}}/api/admin/livestreams?page=1&limit=20&isLive=true&isApproved=false&category=dating&sortBy=createdAt&sortOrder=desc",
 							"host": [
 								"{{base_url}}"
 							],
@@ -2481,12 +2922,22 @@
 								{
 									"key": "isLive",
 									"value": "true",
-									"description": "Filter by live status"
+									"description": "Filter by live status (true/false)"
 								},
 								{
 									"key": "isApproved",
-									"value": "true",
-									"description": "Filter by approval status"
+									"value": "false",
+									"description": "Filter by moderation approval status (true/false)"
+								},
+								{
+									"key": "category",
+									"value": "dating",
+									"description": "Filter by category: 'dating', 'lifestyle', 'entertainment', 'education', 'other'"
+								},
+								{
+									"key": "streamerId",
+									"value": "user_id_here",
+									"description": "Filter by streamer user ID"
 								},
 								{
 									"key": "sortBy",
@@ -2498,7 +2949,7 @@
 								}
 							]
 						},
-						"description": "Get all livestreams with pagination and filters. VideoSDK tokens are never exposed."
+						"description": "Get all livestreams with pagination and filters for moderation. VideoSDK tokens are never exposed in responses. Requires 'content:moderate' permission."
 					}
 				},
 				{
@@ -2529,7 +2980,7 @@
 								}
 							]
 						},
-						"description": "Get detailed information about a specific livestream."
+						"description": "Get detailed information about a specific livestream including streamer details, moderation info, and viewer list. VideoSDK tokens are never exposed. Requires 'content:moderate' permission."
 					}
 				}
 			]
