@@ -99,13 +99,16 @@ export default function MediaModeration() {
 	};
 
 	const getStatusBadge = (status) => {
-		switch (status.toLowerCase()) {
+		switch ((status || '').toLowerCase()) {
+			case 'pending_review':
 			case 'pending':
-				return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><AlertTriangle className="w-3 h-3 mr-1" />Pending</Badge>;
+				return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><AlertTriangle className="w-3 h-3 mr-1" />Pending Review</Badge>;
 			case 'approved':
 				return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
 			case 'rejected':
 				return <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
+			case 'flagged':
+				return <Badge variant="secondary" className="bg-orange-100 text-orange-800"><AlertTriangle className="w-3 h-3 mr-1" />Flagged</Badge>;
 			default:
 				return <Badge variant="outline">{status}</Badge>;
 		}
@@ -178,17 +181,17 @@ export default function MediaModeration() {
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 					{getStatsCards().map((stat, index) => (
 						<Card key={index}>
-						<CardContent className="p-4">
-							<div className="flex items-center space-x-2">
+							<CardContent className="p-4">
+								<div className="flex items-center space-x-2">
 									<stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
-								<div>
+									<div>
 										<p className="text-sm font-medium">{stat.title}</p>
 										<p className="text-2xl font-bold">{stat.value}</p>
 										<p className="text-xs text-muted-foreground">{stat.change}</p>
+									</div>
 								</div>
-							</div>
-						</CardContent>
-					</Card>
+							</CardContent>
+						</Card>
 					))}
 				</div>
 
@@ -212,9 +215,10 @@ export default function MediaModeration() {
 									onChange={(e) => setStatusFilter(e.target.value)}
 								>
 									<option value="all">All Status</option>
-									<option value="pending">Pending</option>
+									<option value="pending_review">⏳ Pending Review</option>
 									<option value="approved">Approved</option>
 									<option value="rejected">Rejected</option>
+									<option value="flagged">Flagged</option>
 								</select>
 
 								<Button variant="outline" size="sm">
@@ -240,11 +244,11 @@ export default function MediaModeration() {
 								Error: {error}
 							</div>
 						) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 								{media.length > 0 ? media.map((item) => (
 									<div key={item._id} className="border rounded-lg p-4 space-y-4">
-									{/* Media Preview */}
-									<div className="relative">
+										{/* Media Preview */}
+										<div className="relative">
 											<div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
 												{item.type === 'image' ? (
 													<img
@@ -258,14 +262,14 @@ export default function MediaModeration() {
 														<Video className="w-8 h-8 mb-2" />
 														<span>Video Content</span>
 													</div>
-											) : (
+												) : (
 													<div className="text-gray-500 text-sm flex flex-col items-center">
 														<File className="w-8 h-8 mb-2" />
 														<span>File Content</span>
 													</div>
-											)}
-										</div>
-										<div className="absolute top-2 right-2">
+												)}
+											</div>
+											<div className="absolute top-2 right-2">
 												{getStatusBadge(item.moderationStatus)}
 											</div>
 											<div className="absolute top-2 left-2">
@@ -273,72 +277,72 @@ export default function MediaModeration() {
 													{getMediaTypeIcon(item.type)}
 													<span>{item.type}</span>
 												</div>
+											</div>
 										</div>
-									</div>
 
-									{/* Media Info */}
-									<div className="space-y-2">
-										<div>
-											<p className="text-sm font-medium">Uploaded by</p>
+										{/* Media Info */}
+										<div className="space-y-2">
+											<div>
+												<p className="text-sm font-medium">Uploaded by</p>
 												<p className="text-sm text-gray-600">
 													{item.userId?.profile?.firstName && item.userId?.profile?.lastName
 														? `${item.userId.profile.firstName} ${item.userId.profile.lastName}`
 														: item.userId?.username || 'Unknown'}
 												</p>
-										</div>
+											</div>
 
-										<div>
+											<div>
 												<p className="text-sm font-medium">Source</p>
 												<p className="text-sm text-gray-600 capitalize">{item.source || 'Unknown'}</p>
-										</div>
+											</div>
 
-										<div>
+											<div>
 												<p className="text-sm font-medium">File Info</p>
 												<p className="text-sm text-gray-600">
 													{formatFileSize(item.size)} • {item.metadata?.width}x{item.metadata?.height || 'N/A'}
 												</p>
-										</div>
+											</div>
 
-										<div className="flex justify-between text-xs text-gray-500">
+											<div className="flex justify-between text-xs text-gray-500">
 												<span>Uploaded: {new Date(item.uploadedAt).toLocaleDateString()}</span>
 												<span>{item.usage?.viewCount || 0} views</span>
+											</div>
 										</div>
-									</div>
 
-									{/* Actions */}
+										{/* Actions */}
 										<div className="space-y-2">
-											{item.moderationStatus === 'pending' && (
-										<div className="flex space-x-2">
+											{(item.moderationStatus === 'pending' || item.moderationStatus === 'pending_review') && (
+												<div className="flex space-x-2">
 													<Button
 														size="sm"
 														className="flex-1 bg-green-600 hover:bg-green-700"
 														onClick={() => handleApproveMedia(item._id)}
 													>
-												<CheckCircle className="w-3 h-3 mr-1" />
-												Approve
-											</Button>
+														<CheckCircle className="w-3 h-3 mr-1" />
+														Approve
+													</Button>
 													<Button
 														size="sm"
 														variant="destructive"
 														className="flex-1"
 														onClick={() => handleRejectMedia(item._id)}
 													>
-												<XCircle className="w-3 h-3 mr-1" />
+														<XCircle className="w-3 h-3 mr-1" />
 														Reject
-											</Button>
-										</div>
-									)}
+													</Button>
+												</div>
+											)}
 
-									<div className="flex space-x-2">
+											<div className="flex space-x-2">
 												<Button
 													size="sm"
 													variant="outline"
 													className="flex-1"
 													onClick={() => handleViewMedia(item)}
 												>
-											<Eye className="w-3 h-3 mr-1" />
-											View Details
-										</Button>
+													<Eye className="w-3 h-3 mr-1" />
+													View Details
+												</Button>
 												<Button
 													size="sm"
 													variant="outline"
@@ -353,9 +357,9 @@ export default function MediaModeration() {
 									<div className="col-span-full text-center py-8 text-gray-500">
 										<Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
 										<p>No media found</p>
-								</div>
+									</div>
 								)}
-						</div>
+							</div>
 						)}
 					</CardContent>
 				</Card>
@@ -557,7 +561,7 @@ export default function MediaModeration() {
 									<Download className="w-4 h-4 mr-2" />
 									Download
 								</Button>
-								{selectedMedia.moderationStatus === 'pending' && (
+								{(selectedMedia.moderationStatus === 'pending' || selectedMedia.moderationStatus === 'pending_review') && (
 									<>
 										<Button
 											className="bg-green-600 hover:bg-green-700"

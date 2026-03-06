@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminUsersAPI } from '@/lib/adminApi';
+import { adminUsersAPI, adminUsersMgmtAPI } from '@/lib/adminApi';
 
 export const useAdminUsers = (initialParams = {}) => {
 	const [users, setUsers] = useState([]);
@@ -37,7 +37,7 @@ export const useAdminUsers = (initialParams = {}) => {
 		} finally {
 			setLoading(false);
 		}
-	}, []); // Remove initialParams dependency to prevent recreation
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const getUserDetails = useCallback(async (userId) => {
 		try {
@@ -53,7 +53,7 @@ export const useAdminUsers = (initialParams = {}) => {
 	const updateUserStatus = useCallback(async (userId, statusData) => {
 		try {
 			await adminUsersAPI.updateUserStatus(userId, statusData);
-			await fetchUsers(); // Refresh the list
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to update user status';
@@ -65,7 +65,7 @@ export const useAdminUsers = (initialParams = {}) => {
 	const banUser = useCallback(async (userData) => {
 		try {
 			await adminUsersAPI.banUser(userData);
-			await fetchUsers(); // Refresh the list
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to ban user';
@@ -77,7 +77,7 @@ export const useAdminUsers = (initialParams = {}) => {
 	const unbanUser = useCallback(async (userData) => {
 		try {
 			await adminUsersAPI.unbanUser(userData);
-			await fetchUsers(); // Refresh the list
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to unban user';
@@ -89,7 +89,7 @@ export const useAdminUsers = (initialParams = {}) => {
 	const bulkBanUsers = useCallback(async (userData) => {
 		try {
 			await adminUsersAPI.bulkBanUsers(userData);
-			await fetchUsers(); // Refresh the list
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to ban users';
@@ -101,7 +101,7 @@ export const useAdminUsers = (initialParams = {}) => {
 	const bulkUnbanUsers = useCallback(async (userData) => {
 		try {
 			await adminUsersAPI.bulkUnbanUsers(userData);
-			await fetchUsers(); // Refresh the list
+			await fetchUsers();
 			return { success: true };
 		} catch (err) {
 			const errorMessage = err.response?.data?.message || 'Failed to unban users';
@@ -109,6 +109,67 @@ export const useAdminUsers = (initialParams = {}) => {
 			return { success: false, error: errorMessage };
 		}
 	}, [fetchUsers]);
+
+	// ─── New CRUD via /api/admin/users-mgmt ───────────────────────────
+
+	const createUser = useCallback(async (data) => {
+		try {
+			const response = await adminUsersMgmtAPI.createUser(data);
+			await fetchUsers();
+			return { success: true, data: response.data };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to create user';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
+	const updateUser = useCallback(async (userId, data) => {
+		try {
+			const response = await adminUsersMgmtAPI.updateUser(userId, data);
+			await fetchUsers();
+			return { success: true, data: response.data };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to update user';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
+	const deleteUser = useCallback(async (userId, permanent = false) => {
+		try {
+			await adminUsersMgmtAPI.deleteUser(userId, permanent);
+			await fetchUsers();
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to delete user';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
+	const bulkDeleteUsers = useCallback(async (userIds, permanent = false) => {
+		try {
+			await adminUsersMgmtAPI.bulkDeleteUsers({ userIds, permanent });
+			await fetchUsers();
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to delete users';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
+	const resetUserPassword = useCallback(async (userId, data) => {
+		try {
+			await adminUsersMgmtAPI.resetUserPassword(userId, data);
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to reset password';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, []);
 
 	// Only fetch on initial mount if initialParams are provided
 	useEffect(() => {
@@ -130,6 +191,11 @@ export const useAdminUsers = (initialParams = {}) => {
 		unbanUser,
 		bulkBanUsers,
 		bulkUnbanUsers,
+		createUser,
+		updateUser,
+		deleteUser,
+		bulkDeleteUsers,
+		resetUserPassword,
 		refetch: () => fetchUsers(),
 	};
 };

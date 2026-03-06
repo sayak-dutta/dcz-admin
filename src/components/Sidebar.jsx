@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { cn } from '@/lib/utils';
+import { useAdminAuthContext } from '@/contexts/AdminAuthContext';
 import {
 	LayoutDashboard,
 	Users,
@@ -48,7 +49,7 @@ const sidebarItems = [
 	{
 		title: "COMMUNITY FEATURES",
 		items: [
-			{ name: "Messenger Monitoring", href: "/messenger", icon: MessageSquare },
+			{ name: "Messenger Monitoring", href: "/messenger", icon: MessageSquare, requiresSuperAdmin: true },
 			{ name: "Live Chatrooms", href: "/chatrooms", icon: MessageSquare },
 			{ name: "Livestreams", href: "/livestreams", icon: Monitor },
 			{ name: "Groups", href: "/groups", icon: Users },
@@ -77,6 +78,7 @@ const sidebarItems = [
 
 export default function Sidebar() {
 	const router = useRouter();
+	const { isSuperAdmin } = useAdminAuthContext();
 
 	return (
 		<div className="w-64 bg-slate-900 text-white h-screen overflow-y-auto">
@@ -96,7 +98,9 @@ export default function Sidebar() {
 							{section.title}
 						</h3>
 						<ul className="space-y-1">
-							{section.items.map((item, itemIndex) => {
+							{section.items
+								.filter(item => !item.requiresSuperAdmin || isSuperAdmin?.())
+								.map((item, itemIndex) => {
 								const Icon = item.icon;
 								const isActive = router.pathname === item.href;
 

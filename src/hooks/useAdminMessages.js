@@ -18,8 +18,12 @@ export const useAdminMessages = (initialParams = {}) => {
 			setConversations(response.data.data.conversations || response.data.data || []);
 			return response.data;
 		} catch (err) {
-			const errorMessage = err.response?.data?.message || 'Failed to fetch conversations';
-			setError(errorMessage);
+			const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch conversations';
+			if (errorMessage.includes('Access denied')) {
+				setError('You do not have permission to access message conversations. Super-admin role required.');
+			} else {
+				setError(errorMessage);
+			}
 			console.error('Conversations fetch error:', err);
 			return null;
 		} finally {
@@ -32,8 +36,12 @@ export const useAdminMessages = (initialParams = {}) => {
 			const response = await adminMessagesAPI.getConversationMessages(conversationId, params);
 			return response.data;
 		} catch (err) {
-			const errorMessage = err.response?.data?.message || 'Failed to fetch conversation messages';
-			setError(errorMessage);
+			const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch conversation messages';
+			if (errorMessage.includes('Access denied')) {
+				setError('You do not have permission to access message conversations. Super-admin role required.');
+			} else {
+				setError(errorMessage);
+			}
 			throw new Error(errorMessage);
 		}
 	}, []);

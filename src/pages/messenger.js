@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,8 @@ import {
 	Video,
 	File,
 	Trash2,
-	EyeOff
+	EyeOff,
+	ShieldAlert
 } from 'lucide-react';
 import { useAdminMessages } from '@/hooks/useAdminMessages';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -36,11 +38,31 @@ import { Modal } from '@/components/ui/modal';
 import { useAdminAuthContext } from '@/contexts/AdminAuthContext';
 
 export default function MessengerMonitoring() {
+	const router = useRouter();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedConversation, setSelectedConversation] = useState(null);
 	const [showConversationModal, setShowConversationModal] = useState(false);
-	const { adminUser } = useAdminAuthContext();
+	const { adminUser, isSuperAdmin, loading: authLoading } = useAdminAuthContext();
 	const messagesEndRef = useRef(null);
+
+	if (!authLoading && !isSuperAdmin()) {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+				<Card className="max-w-md w-full mx-4">
+					<CardContent className="pt-6 text-center space-y-4">
+						<ShieldAlert className="w-16 h-16 text-amber-500 mx-auto" />
+						<CardTitle className="text-xl">Access Denied</CardTitle>
+						<p className="text-gray-600">
+							You do not have permission to view this page. Messenger monitoring is restricted to super-admins only.
+						</p>
+						<Button onClick={() => router.push('/')} className="w-full">
+							Return to Dashboard
+						</Button>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
 
 	const {
 		conversations,

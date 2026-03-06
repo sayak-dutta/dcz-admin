@@ -127,7 +127,10 @@ export default function GroupsPage() {
 		}
 	};
 
-	const getStatusBadge = (isActive, isVerified, isFeatured) => {
+	const getStatusBadge = (isActive, isVerified, isFeatured, status) => {
+		if (status === 'pending_approval') return <Badge variant="warning">Pending Approval</Badge>;
+		if (status === 'rejected') return <Badge variant="destructive">Rejected</Badge>;
+		if (status === 'suspended') return <Badge variant="secondary">Suspended</Badge>;
 		if (!isActive) return <Badge variant="secondary">Inactive</Badge>;
 		if (isFeatured) return <Badge variant="default">Featured</Badge>;
 		if (isVerified) return <Badge variant="success">Verified</Badge>;
@@ -232,8 +235,11 @@ export default function GroupsPage() {
 									onChange={(e) => setStatusFilter(e.target.value)}
 								>
 									<option value="all">All Status</option>
+									<option value="pending_approval">⏳ Pending Approval</option>
 									<option value="active">Active</option>
 									<option value="inactive">Inactive</option>
+									<option value="rejected">Rejected</option>
+									<option value="suspended">Suspended</option>
 									<option value="verified">Verified</option>
 									<option value="featured">Featured</option>
 								</select>
@@ -292,7 +298,7 @@ export default function GroupsPage() {
 												{getGroupTypeBadge(group.groupType)}
 											</TableCell>
 											<TableCell>
-												{getStatusBadge(group.isActive, group.isVerified, group.isFeatured)}
+												{getStatusBadge(group.isActive, group.isVerified, group.isFeatured, group.status)}
 											</TableCell>
 											<TableCell className="text-sm">{group.memberCount || 0}</TableCell>
 											<TableCell className="text-sm">{group.postCount || 0}</TableCell>
@@ -310,14 +316,36 @@ export default function GroupsPage() {
 													>
 														<Eye className="w-4 h-4" />
 													</Button>
-													<Button
-														size="sm"
-														variant="ghost"
-														onClick={() => handleUpdateGroupStatus(group._id, group.isActive ? 'inactive' : 'active')}
-														title={group.isActive ? 'Deactivate group' : 'Activate group'}
-													>
-														<Settings className="w-4 h-4" />
-													</Button>
+													{group.status === 'pending_approval' ? (
+														<>
+															<Button
+																size="sm"
+																className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
+																onClick={() => handleUpdateGroupStatus(group._id, 'active')}
+																title="Approve group"
+															>
+																Approve
+															</Button>
+															<Button
+																size="sm"
+																variant="destructive"
+																className="h-7 px-2 text-xs"
+																onClick={() => handleUpdateGroupStatus(group._id, 'rejected', 'Violates community guidelines')}
+																title="Reject group"
+															>
+																Reject
+															</Button>
+														</>
+													) : (
+														<Button
+															size="sm"
+															variant="ghost"
+															onClick={() => handleUpdateGroupStatus(group._id, group.isActive ? 'inactive' : 'active')}
+															title={group.isActive ? 'Deactivate group' : 'Activate group'}
+														>
+															<Settings className="w-4 h-4" />
+														</Button>
+													)}
 													<Button
 														size="sm"
 														variant="ghost"

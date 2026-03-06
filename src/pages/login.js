@@ -32,11 +32,15 @@ export default function AdminLogin() {
 		}
 
 		const result = await login(formData);
-		console.log(result);
 
 		if (result.success) {
-			// Use window.location for reliable navigation after login
 			window.location.href = '/';
+		} else if (result.mfaNotSetup && result.tempToken) {
+			// First-time MFA setup required
+			window.location.href = `/mfa-setup?tempToken=${encodeURIComponent(result.tempToken)}`;
+		} else if (result.mfaRequired && result.tempToken) {
+			// MFA verification step
+			window.location.href = `/mfa-verify?tempToken=${encodeURIComponent(result.tempToken)}`;
 		}
 	};
 

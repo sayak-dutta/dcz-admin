@@ -9,13 +9,32 @@ const adminApi = axios.create({
 	},
 });
 
-// Request interceptor to add admin auth token
+// Request interceptor to add admin auth token and role-based access control
 adminApi.interceptors.request.use(
 	(config) => {
 		const adminToken = localStorage.getItem('admin_jwt_token');
 		if (adminToken) {
 			config.headers.Authorization = `Bearer ${adminToken}`;
 		}
+
+		// Role-based access control for message endpoints
+		const url = config.url || '';
+		if (url.includes('/messages/')) {
+			const userData = localStorage.getItem('admin_user_data');
+			if (userData) {
+				try {
+					const user = JSON.parse(userData);
+					if (user.role !== 'super_admin') {
+						return Promise.reject(
+							new Error('Access denied. Super-admin role required to access message endpoints.')
+						);
+					}
+				} catch (e) {
+					console.error('Error parsing admin user data:', e);
+				}
+			}
+		}
+
 		return config;
 	},
 	(error) => {
@@ -27,6 +46,9 @@ adminApi.interceptors.request.use(
 adminApi.interceptors.response.use(
 	(response) => response,
 	(error) => {
+		if (error.message && error.message.includes('Access denied')) {
+			return Promise.reject(error);
+		}
 		if (error.response?.status === 401) {
 			// Handle unauthorized access - clear admin token and redirect
 			localStorage.removeItem('admin_jwt_token');
@@ -34,6 +56,9 @@ adminApi.interceptors.response.use(
 			if (typeof window !== 'undefined') {
 				window.location.href = '/login';
 			}
+		}
+		if (error.response?.status === 403) {
+			return Promise.reject(new Error('Access denied. You do not have permission to perform this action.'));
 		}
 		return Promise.reject(error);
 	}
@@ -47,7 +72,12 @@ export const adminAuthAPI = {
 		localStorage.removeItem('admin_jwt_token');
 		localStorage.removeItem('admin_user_data');
 		return Promise.resolve();
-	}
+	},
+	// MFA endpoints (per apiguide.md)
+	setupMfa: (tempToken) => adminApi.post('/api/admin/auth/mfa/setup', {}, { headers: { Authorization: `Bearer ${tempToken}` } }),
+	confirmMfa: (data, tempToken) => adminApi.post('/api/admin/auth/mfa/confirm', data, { headers: { Authorization: `Bearer ${tempToken}` } }),
+	verifyMfa: (data, tempToken) => adminApi.post('/api/admin/auth/mfa/verify', data, { headers: { Authorization: `Bearer ${tempToken}` } }),
+	disableMfa: (data) => adminApi.delete('/api/admin/auth/mfa', { data }),
 };
 
 // Bans API
@@ -78,7 +108,7 @@ export const adminDashboardAPI = {
 	getStats: () => adminApi.get('/api/admin/dashboard/stats'),
 };
 
-// User Management API
+// User Management API (read + ban/unban — existing endpoints)
 export const adminUsersAPI = {
 	getAllUsers: (params) => adminApi.get('/api/admin/users', { params }),
 	getUserDetails: (userId) => adminApi.get(`/api/admin/users/${userId}`),
@@ -87,6 +117,31 @@ export const adminUsersAPI = {
 	unbanUser: (userData) => adminApi.post('/api/admin/users/unban', userData),
 	bulkBanUsers: (userData) => adminApi.post('/api/admin/users/bulk-ban', userData),
 	bulkUnbanUsers: (userData) => adminApi.post('/api/admin/users/bulk-unban', userData),
+};
+
+// User CRUD API — /api/admin/users-mgmt (super_admin only for write ops)
+export const adminUsersMgmtAPI = {
+	createUser: (data) => adminApi.post('/api/admin/users-mgmt', data),
+	updateUser: (userId, data) => adminApi.put(`/api/admin/users-mgmt/${userId}`, data),
+	deleteUser: (userId, permanent = false) => adminApi.delete(`/api/admin/users-mgmt/${userId}${permanent ? '?permanent=true' : ''}`),
+	bulkDeleteUsers: (data) => adminApi.post('/api/admin/users-mgmt/bulk-delete', data),
+	resetUserPassword: (userId, data) => adminApi.post(`/api/admin/users-mgmt/${userId}/reset-password`, data),
+};
+
+// Signup Approval API
+export const adminSignupsAPI = {
+	getAll: (params) => adminApi.get('/api/admin/signups', { params }),
+	approve: (userId) => adminApi.post(`/api/admin/signups/${userId}/approve`),
+	reject: (userId, data) => adminApi.post(`/api/admin/signups/${userId}/reject`, data),
+	bulkApprove: (data) => adminApi.post('/api/admin/signups/bulk-approve', data),
+	bulkReject: (data) => adminApi.post('/api/admin/signups/bulk-reject', data),
+};
+
+// Fire Date Approval API
+export const adminFireDatesAPI = {
+	getPending: (params) => adminApi.get('/api/admin/fire-dates/pending', { params }),
+	approve: (fireDateId) => adminApi.post(`/api/admin/fire-dates/${fireDateId}/approve`),
+	reject: (fireDateId, data) => adminApi.post(`/api/admin/fire-dates/${fireDateId}/reject`, data),
 };
 
 // Profile Verifications API

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { isSuperAdmin, isAdmin } from '@/lib/permissions';
 
 const AdminAuthContext = createContext();
 
@@ -25,6 +26,8 @@ export const AdminAuthProvider = ({ children }) => {
 	const value = {
 		...adminAuth,
 		isInitialized,
+		isSuperAdmin: () => isSuperAdmin(adminAuth.adminUser),
+		isAdmin: () => isAdmin(adminAuth.adminUser),
 	};
 
 	return (

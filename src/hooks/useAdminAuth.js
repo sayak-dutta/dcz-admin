@@ -13,11 +13,21 @@ export const useAdminAuth = () => {
 			setError(null);
 
 			const response = await adminAuthAPI.login(credentials);
-			console.log('Login response:', response.data);
+			const data = response.data;
 
-			// Handle different possible response formats
-			const token = response.data?.data?.token || response.data?.token;
-			const user = response.data?.data?.user || response.data?.user || response.data?.admin;
+			// MFA required — backend returns a short-lived tempToken instead of full JWT
+			if (data?.mfaRequired || data?.mfaNotSetup) {
+				return {
+					success: false,
+					mfaRequired: data.mfaRequired || false,
+					mfaNotSetup: data.mfaNotSetup || false,
+					tempToken: data.tempToken,
+				};
+			}
+
+			// Normal login (no MFA configured on this account)
+			const token = data?.data?.token || data?.token;
+			const user = data?.data?.user || data?.user || data?.admin;
 
 			if (token && user) {
 				localStorage.setItem(STORAGE_KEYS.ADMIN_JWT_TOKEN, token);
@@ -33,6 +43,57 @@ export const useAdminAuth = () => {
 			return { success: false, error: errorMessage };
 		} finally {
 			setLoading(false);
+		}
+	}, []);
+
+	// Verify TOTP code — exchanges tempToken + 6-digit code for full JWT
+	const verifyMfa = useCallback(async (code, tempToken) => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			const response = await adminAuthAPI.verifyMfa({ code }, tempToken);
+			const data = response.data;
+
+			const token = data?.data?.token || data?.token;
+			const user = data?.data?.user || data?.user;
+
+			if (token && user) {
+				localStorage.setItem(STORAGE_KEYS.ADMIN_JWT_TOKEN, token);
+				localStorage.setItem(STORAGE_KEYS.ADMIN_USER_DATA, JSON.stringify(user));
+				setAdminUser(user);
+				return { success: true };
+			} else {
+				throw new Error('MFA verification failed — invalid response');
+			}
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Invalid or expired TOTP code';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Setup MFA — get QR code URI
+	const setupMfa = useCallback(async (tempToken) => {
+		try {
+			const response = await adminAuthAPI.setupMfa(tempToken);
+			return { success: true, data: response.data };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to initialize MFA setup';
+			return { success: false, error: errorMessage };
+		}
+	}, []);
+
+	// Confirm MFA setup — verify first code to activate TOTP
+	const confirmMfaSetup = useCallback(async (code, tempToken) => {
+		try {
+			const response = await adminAuthAPI.confirmMfa({ code }, tempToken);
+			return { success: true, data: response.data };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Invalid or expired TOTP code';
+			return { success: false, error: errorMessage };
 		}
 	}, []);
 
@@ -99,6 +160,9 @@ export const useAdminAuth = () => {
 		isAuthenticated,
 		login,
 		logout,
+		verifyMfa,
+		setupMfa,
+		confirmMfaSetup,
 		getProfile,
 		checkAuthStatus,
 	};
