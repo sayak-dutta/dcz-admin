@@ -45,6 +45,22 @@ export default function MessengerMonitoring() {
 	const { adminUser, isSuperAdmin, loading: authLoading } = useAdminAuthContext();
 	const messagesEndRef = useRef(null);
 
+	// All hooks must be called unconditionally before any early returns
+	const {
+		conversations,
+		loading,
+		error,
+		fetchConversations,
+		getConversationMessages
+	} = useAdminMessages();
+
+	// Auto-scroll to bottom when messages are loaded
+	useEffect(() => {
+		if (messagesEndRef.current && selectedConversation?.messages?.length > 0) {
+			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [selectedConversation?.messages]);
+
 	if (!authLoading && !isSuperAdmin()) {
 		return (
 			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -64,14 +80,6 @@ export default function MessengerMonitoring() {
 		);
 	}
 
-	const {
-		conversations,
-		loading,
-		error,
-		fetchConversations,
-		getConversationMessages
-	} = useAdminMessages();
-
 	const handleViewConversation = async (conversation) => {
 		setSelectedConversation(conversation);
 		setShowConversationModal(true);
@@ -87,13 +95,6 @@ export default function MessengerMonitoring() {
 			}));
 		}
 	};
-
-	// Auto-scroll to bottom when messages are loaded
-	useEffect(() => {
-		if (messagesEndRef.current && selectedConversation?.messages?.length > 0) {
-			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-		}
-	}, [selectedConversation?.messages]);
 
 	// Helper function to format timestamp
 	const formatMessageTime = (timestamp) => {
