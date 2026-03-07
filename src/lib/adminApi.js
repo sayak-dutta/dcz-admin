@@ -73,11 +73,25 @@ export const adminAuthAPI = {
 		localStorage.removeItem('admin_user_data');
 		return Promise.resolve();
 	},
-	// MFA endpoints (per apiguide.md)
-	setupMfa: (tempToken) => adminApi.post('/api/admin/auth/mfa/setup', {}, { headers: { Authorization: `Bearer ${tempToken}` } }),
-	confirmMfa: (data, tempToken) => adminApi.post('/api/admin/auth/mfa/confirm', data, { headers: { Authorization: `Bearer ${tempToken}` } }),
-	verifyMfa: (data, tempToken) => adminApi.post('/api/admin/auth/mfa/verify', data, { headers: { Authorization: `Bearer ${tempToken}` } }),
+	// MFA endpoints — tempToken is only passed during post-login flow;
+	// when called from Settings (already logged in), tempToken is null/undefined
+	// and the axios interceptor attaches the full JWT automatically.
+	setupMfa: (tempToken) => adminApi.post(
+		'/api/admin/auth/mfa/setup', {},
+		tempToken ? { headers: { Authorization: `Bearer ${tempToken}` } } : {}
+	),
+	confirmMfa: (data, tempToken) => adminApi.post(
+		'/api/admin/auth/mfa/confirm', data,
+		tempToken ? { headers: { Authorization: `Bearer ${tempToken}` } } : {}
+	),
+	verifyMfa: (data, tempToken) => adminApi.post(
+		'/api/admin/auth/mfa/verify', data,
+		tempToken ? { headers: { Authorization: `Bearer ${tempToken}` } } : {}
+	),
 	disableMfa: (data) => adminApi.delete('/api/admin/auth/mfa', { data }),
+	// Profile & password management
+	updateProfile: (data) => adminApi.put('/api/admin/auth/profile', data),
+	changePassword: (data) => adminApi.put('/api/admin/auth/password', data),
 };
 
 // Bans API
@@ -250,6 +264,21 @@ export const adminAppContentAPI = {
 	updatePrivacyPolicy: (contentData) => adminApi.put('/api/admin/app-content/privacy', contentData),
 	getTermsOfService: () => adminApi.get('/api/admin/app-content/terms'),
 	updateTermsOfService: (contentData) => adminApi.put('/api/admin/app-content/terms', contentData),
+};
+
+// App Config API (feature flag toggles — super_admin only for writes)
+export const adminAppConfigAPI = {
+	getConfig: () => adminApi.get('/api/admin/app-config'),
+	updateConfig: (data) => adminApi.put('/api/admin/app-config', data),
+};
+
+// Admin Accounts API (manage operator accounts, not end-users)
+export const adminAdminsAPI = {
+	getAll: () => adminApi.get('/api/admin/admins'),
+	create: (data) => adminApi.post('/api/admin/admins', data),
+	update: (adminId, data) => adminApi.put(`/api/admin/admins/${adminId}`, data),
+	resetPassword: (adminId, data) => adminApi.post(`/api/admin/admins/${adminId}/reset-password`, data),
+	remove: (adminId) => adminApi.delete(`/api/admin/admins/${adminId}`),
 };
 
 export default adminApi;

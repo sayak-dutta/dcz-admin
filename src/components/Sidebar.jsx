@@ -33,7 +33,7 @@ const sidebarItems = [
 		title: "USER MANAGEMENT",
 		items: [
 			{ name: "All Members", href: "/members", icon: Users },
-			//   { name: "New Signups", href: "/signups", icon: UserPlus, badge: "24" },
+			{ name: "New Signups", href: "/signups", icon: UserPlus },
 			{ name: "Premium Members", href: "/premium", icon: Users },
 			{ name: "Banned Users", href: "/banned", icon: UserX },
 		]
@@ -69,6 +69,7 @@ const sidebarItems = [
 	{
 		title: "SYSTEM SETTINGS",
 		items: [
+			{ name: "Admin Settings", href: "/settings", icon: Settings },
 			{ name: "Subscription Plans", href: "/settings/plans", icon: DollarSign },
 			{ name: "Privacy Policy", href: "/settings/privacy", icon: Shield },
 			{ name: "Terms of Service", href: "/settings/terms", icon: FileText },
@@ -101,33 +102,33 @@ export default function Sidebar() {
 							{section.items
 								.filter(item => !item.requiresSuperAdmin || isSuperAdmin?.())
 								.map((item, itemIndex) => {
-								const Icon = item.icon;
-								const isActive = router.pathname === item.href;
+									const Icon = item.icon;
+									const isActive = router.pathname === item.href;
 
-								return (
-									<li key={itemIndex}>
-										<Link
-											href={item.href}
-											className={cn(
-												"flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-												isActive
-													? "bg-blue-600 text-white"
-													: "text-slate-300 hover:bg-slate-800 hover:text-white"
-											)}
-										>
-											<div className="flex items-center space-x-3">
-												<Icon className="w-4 h-4" />
-												<span>{item.name}</span>
-											</div>
-											{item.badge && (
-												<span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-													{item.badge}
-												</span>
-											)}
-										</Link>
-									</li>
-								);
-							})}
+									return (
+										<li key={itemIndex}>
+											<Link
+												href={item.href}
+												className={cn(
+													"flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
+													isActive
+														? "bg-blue-600 text-white"
+														: "text-slate-300 hover:bg-slate-800 hover:text-white"
+												)}
+											>
+												<div className="flex items-center space-x-3">
+													<Icon className="w-4 h-4" />
+													<span>{item.name}</span>
+												</div>
+												{item.badge && (
+													<span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+														{item.badge}
+													</span>
+												)}
+											</Link>
+										</li>
+									);
+								})}
 						</ul>
 					</div>
 				))}

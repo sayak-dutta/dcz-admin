@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,25 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 export default function MfaVerify() {
 	const router = useRouter();
-	const { tempToken } = router.query;
-	const { verifyMfa, loading, error } = useAdminAuth();
+	const { verifyMfa, loading } = useAdminAuth();
 
 	const [code, setCode] = useState('');
 	const [localError, setLocalError] = useState('');
+	const [submitting, setSubmitting] = useState(false);
+
+	// ── Store tempToken after router hydrates (same pattern as mfa-setup) ──
+	const [tempToken, setTempToken] = useState(null);
+	const [routerReady, setRouterReady] = useState(false);
+
+	useEffect(() => {
+		if (!router.isReady) return;
+		const token = router.query.tempToken;
+		if (!token) {
+			setLocalError('Session expired. Please log in again.');
+		}
+		setTempToken(token || null);
+		setRouterReady(true);
+	}, [router.isReady, router.query.tempToken]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -23,24 +37,35 @@ export default function MfaVerify() {
 			return;
 		}
 
+		// tempToken must be available — router must have hydrated
 		if (!tempToken) {
-			setLocalError('Session expired. Please log in again.');
+			setLocalError('Session expired. Please go back and log in again.');
 			return;
 		}
 
-		const result = await verifyMfa(code, tempToken);
-
-		if (result.success) {
-			window.location.href = '/';
-		} else {
-			setLocalError(result.error || 'Invalid or expired code. Please try again.');
+		setSubmitting(true);
+		try {
+			const result = await verifyMfa(code, tempToken);
+			if (result.success) {
+				window.location.href = '/';
+			} else {
+				setLocalError(result.error || 'Invalid or expired code. Please try again.');
+			}
+		} catch (err) {
+			setLocalError('Something went wrong. Please try again.');
+		} finally {
+			setSubmitting(false);
 		}
 	};
 
 	const handleCodeChange = (e) => {
 		const val = e.target.value.replace(/\D/g, '').slice(0, 6);
 		setCode(val);
+		// Clear error when user re-types
+		if (localError && !localError.includes('expired')) setLocalError('');
 	};
+
+	const isBusy = submitting || loading;
 
 	return (
 		<div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
@@ -60,68 +85,76 @@ export default function MfaVerify() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<form onSubmit={handleSubmit} className="space-y-5">
-							{/* TOTP Input */}
-							<div>
-								<label htmlFor="totp-code" className="block text-sm font-medium text-slate-300 mb-2">
-									6-Digit Authenticator Code
-								</label>
-								<Input
-									id="totp-code"
-									name="code"
-									type="text"
-									inputMode="numeric"
-									autoComplete="one-time-code"
-									value={code}
-									onChange={handleCodeChange}
-									placeholder="000000"
-									className="bg-slate-700 border-slate-600 text-white text-center text-2xl tracking-[0.5em] placeholder:text-slate-500 h-14 font-mono"
-									maxLength={6}
-									required
-									disabled={loading}
-									autoFocus
-								/>
-								<p className="text-xs text-slate-500 mt-2 text-center">
-									Code refreshes every 30 seconds
-								</p>
+						{/* Waiting for router hydration */}
+						{!routerReady ? (
+							<div className="flex flex-col items-center py-8 gap-3">
+								<RefreshCw className="w-6 h-6 text-blue-400 animate-spin" />
+								<p className="text-slate-400 text-sm">Loading…</p>
 							</div>
-
-							{/* Error */}
-							{(localError || error) && (
-								<div className="flex items-center space-x-2 p-3 bg-red-900/50 border border-red-700 rounded-md">
-									<AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-									<p className="text-sm text-red-400">{localError || error}</p>
+						) : (
+							<form onSubmit={handleSubmit} className="space-y-5">
+								{/* TOTP Input */}
+								<div>
+									<label htmlFor="totp-code" className="block text-sm font-medium text-slate-300 mb-2">
+										6-Digit Authenticator Code
+									</label>
+									<Input
+										id="totp-code"
+										name="code"
+										type="text"
+										inputMode="numeric"
+										autoComplete="one-time-code"
+										value={code}
+										onChange={handleCodeChange}
+										placeholder="000000"
+										className="bg-slate-700 border-slate-600 text-white text-center text-2xl tracking-[0.5em] placeholder:text-slate-500 h-14 font-mono"
+										maxLength={6}
+										required
+										disabled={isBusy || !tempToken}
+										autoFocus
+									/>
+									<p className="text-xs text-slate-500 mt-2 text-center">
+										Code refreshes every 30 seconds
+									</p>
 								</div>
-							)}
 
-							{/* Submit */}
-							<Button
-								type="submit"
-								className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-								disabled={loading || code.length !== 6}
-							>
-								{loading ? (
-									<>
-										<RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-										Verifying...
-									</>
-								) : (
-									'Verify & Sign In'
+								{/* Error */}
+								{localError && (
+									<div className="flex items-center space-x-2 p-3 bg-red-900/50 border border-red-700 rounded-md">
+										<AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+										<p className="text-sm text-red-400">{localError}</p>
+									</div>
 								)}
-							</Button>
 
-							{/* Back */}
-							<div className="text-center">
-								<button
-									type="button"
-									onClick={() => router.push('/login')}
-									className="text-sm text-slate-400 hover:text-slate-300 flex items-center justify-center mx-auto gap-1"
+								{/* Submit */}
+								<Button
+									type="submit"
+									className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+									disabled={isBusy || code.length !== 6 || !tempToken}
 								>
-									<ArrowLeft className="w-3 h-3" />
-									Back to Login
-								</button>
-							</div>
-						</form>
+									{isBusy ? (
+										<>
+											<RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+											Verifying...
+										</>
+									) : (
+										'Verify & Sign In'
+									)}
+								</Button>
+
+								{/* Back */}
+								<div className="text-center">
+									<button
+										type="button"
+										onClick={() => router.push('/login')}
+										className="text-sm text-slate-400 hover:text-slate-300 flex items-center justify-center mx-auto gap-1"
+									>
+										<ArrowLeft className="w-3 h-3" />
+										Back to Login
+									</button>
+								</div>
+							</form>
+						)}
 					</CardContent>
 				</Card>
 

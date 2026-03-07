@@ -49,7 +49,7 @@ const membershipOptions = [
 ];
 
 const EMPTY_FORM = {
-	name: '',
+	username: '',
 	email: '',
 	phone: '',
 	role: 'user',
@@ -165,8 +165,8 @@ export default function AllMembers() {
 	const handleCreate = async (e) => {
 		e.preventDefault();
 		setFormError('');
-		if (!formData.name || !formData.email || !formData.password) {
-			setFormError('Name, email and password are required.');
+		if (!formData.username || !formData.email || !formData.password) {
+			setFormError('Username, email and password are required.');
 			return;
 		}
 		setFormLoading(true);
@@ -183,7 +183,7 @@ export default function AllMembers() {
 	const openEditModal = (user) => {
 		setSelectedUser(user);
 		setFormData({
-			name: user.name || user.username || '',
+			username: user.username || '',
 			email: user.email || '',
 			phone: user.phone || '',
 			role: user.role || 'user',
@@ -490,11 +490,11 @@ export default function AllMembers() {
 						<form onSubmit={handleCreate} className="space-y-4">
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+									<label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
 									<Input
-										value={formData.name}
-										onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-										placeholder="John Doe"
+										value={formData.username}
+										onChange={(e) => setFormData((p) => ({ ...p, username: e.target.value }))}
+										placeholder="johndoe"
 										required
 									/>
 								</div>
@@ -590,10 +590,11 @@ export default function AllMembers() {
 						<form onSubmit={handleEdit} className="space-y-4">
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+									<label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
 									<Input
-										value={formData.name}
-										onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+										value={formData.username}
+										onChange={(e) => setFormData((p) => ({ ...p, username: e.target.value }))}
+										placeholder="johndoe"
 									/>
 								</div>
 								<div>
