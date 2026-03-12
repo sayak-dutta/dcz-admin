@@ -42,6 +42,7 @@ const sidebarItems = [
 		title: "CONTENT MODERATION",
 		items: [
 			//   { name: "Profile Verifications", href: "/verifications", icon: ShieldCheck, badge: "18" },
+			{ name: "Video KYC Approvals", href: "/video-kyc", icon: ShieldCheck },
 			{ name: "Reported Content", href: "/reports", icon: Flag },
 			{ name: "Media Moderation", href: "/media", icon: MessageSquare },
 		]

@@ -110,6 +110,30 @@ export const useAdminUsers = (initialParams = {}) => {
 		}
 	}, [fetchUsers]);
 
+	const approveVideoKyc = useCallback(async (userId) => {
+		try {
+			await adminUsersAPI.approveVideoKyc(userId);
+			await fetchUsers();
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to approve Video KYC';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
+	const rejectVideoKyc = useCallback(async (userId, reasonData) => {
+		try {
+			await adminUsersAPI.rejectVideoKyc(userId, reasonData);
+			await fetchUsers();
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err.response?.data?.message || 'Failed to reject Video KYC';
+			setError(errorMessage);
+			return { success: false, error: errorMessage };
+		}
+	}, [fetchUsers]);
+
 	// ─── New CRUD via /api/admin/users-mgmt ───────────────────────────
 
 	const createUser = useCallback(async (data) => {
@@ -196,6 +220,8 @@ export const useAdminUsers = (initialParams = {}) => {
 		deleteUser,
 		bulkDeleteUsers,
 		resetUserPassword,
+		approveVideoKyc,
+		rejectVideoKyc,
 		refetch: () => fetchUsers(),
 	};
 };

@@ -131,6 +131,8 @@ export const adminUsersAPI = {
 	unbanUser: (userData) => adminApi.post('/api/admin/users/unban', userData),
 	bulkBanUsers: (userData) => adminApi.post('/api/admin/users/bulk-ban', userData),
 	bulkUnbanUsers: (userData) => adminApi.post('/api/admin/users/bulk-unban', userData),
+	approveVideoKyc: (userId) => adminApi.post(`/api/admin/users/${userId}/video-kyc/approve`),
+	rejectVideoKyc: (userId, data) => adminApi.post(`/api/admin/users/${userId}/video-kyc/reject`, data),
 };
 
 // User CRUD API — /api/admin/users-mgmt (super_admin only for write ops)

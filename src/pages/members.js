@@ -38,7 +38,7 @@ const filterOptions = [
 	{ label: 'All Status', value: 'all' },
 	{ label: 'Active', value: 'active' },
 	{ label: 'Pending', value: 'pending' },
-	{ label: 'Suspended', value: 'suspended' },
+	{ label: 'Banned', value: 'banned' },
 ];
 
 const membershipOptions = [
@@ -693,7 +693,10 @@ export default function AllMembers() {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4 text-sm">
+						<div className="grid grid-cols-2 gap-4 text-sm mt-6">
+							<div className="col-span-2 border-b pb-2 mb-2">
+								<h4 className="text-sm font-semibold text-gray-900">Account Infomation</h4>
+							</div>
 							{[
 								['User ID', userDetails._id],
 								['Username', userDetails.username || 'N/A'],
@@ -701,14 +704,52 @@ export default function AllMembers() {
 								['Phone', userDetails.phone || 'N/A'],
 								['Joined', userDetails.createdAt ? new Date(userDetails.createdAt).toLocaleDateString() : 'N/A'],
 								['Last Active', userDetails.lastSeen ? new Date(userDetails.lastSeen).toLocaleDateString() : 'N/A'],
-								['Email Verified', userDetails.emailVerified ? 'Yes' : 'No'],
-								['Phone Verified', userDetails.phoneVerified ? 'Yes' : 'No'],
 							].map(([label, val]) => (
 								<div key={label}>
 									<label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
 									<p className="text-gray-900 mt-0.5 break-all">{val}</p>
 								</div>
 							))}
+						</div>
+
+						{/* Verification Flags Section */}
+						<div className="grid grid-cols-2 gap-4 text-sm mt-6">
+							<div className="col-span-2 border-b pb-2 mb-2">
+								<h4 className="text-sm font-semibold text-gray-900">Verification Details</h4>
+							</div>
+							{[
+								['Email Verified', userDetails.verification?.emailVerified || userDetails.emailVerified ? 'Yes' : 'No'],
+								['Phone Verified', userDetails.verification?.phoneVerified || userDetails.phoneVerified ? 'Yes' : 'No'],
+								['KYC Verified', userDetails.verification?.kycVerified ? 'Yes' : 'No'],
+								['Video KYC Verified', userDetails.verification?.videoKycVerified ? 'Yes' : 'No'],
+								['Video KYC Raised', userDetails.verification?.isVideoKycRaised ? 'Yes' : 'No'],
+								['KYC Provider', userDetails.verification?.kycProvider || 'N/A'],
+								['KYC Type', userDetails.verification?.kycType || 'N/A'],
+								['KYC Verified At', userDetails.verification?.kycVerifiedAt ? new Date(userDetails.verification.kycVerifiedAt).toLocaleDateString() : 'N/A'],
+							].map(([label, val]) => (
+								<div key={`verif-${label}`}>
+									<label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
+									<p className="text-gray-900 mt-0.5 break-all">{val}</p>
+								</div>
+							))}
+							
+							{userDetails.verification?.videoKycUrl && (
+								<div className="col-span-2">
+									<label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Video KYC Booking URL</label>
+									<p className="text-gray-900 mt-0.5 break-all">
+										<a href={userDetails.verification.videoKycUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+											{userDetails.verification.videoKycUrl}
+										</a>
+									</p>
+								</div>
+							)}
+
+							{userDetails.rejectionReason && (
+								<div className="col-span-2 mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+									<label className="text-xs font-medium text-red-500 uppercase tracking-wide">Rejection Reason</label>
+									<p className="text-red-700 mt-0.5 break-all">{userDetails.rejectionReason}</p>
+								</div>
+							)}
 						</div>
 
 						{userDetails.profile && (
